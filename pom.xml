@@ -27,8 +27,8 @@ under the License.
     <version>1.5-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
-    <name>HACKED Apache Maven PDF Plugin</name>
-    <description>Generates a PDF document from the project site.</description>
+    <name>Apache Maven PDF Plugin Fork</name>
+    <description>Generates a PDF document from the project site. This fork adds more header/footer options.</description>
   
     <contributors>
         <contributor>
