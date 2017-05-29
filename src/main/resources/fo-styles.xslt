@@ -198,13 +198,16 @@
         <xsl:attribute name="font-family">Helvetica,sans-serif</xsl:attribute>
         <xsl:attribute name="font-size">6pt</xsl:attribute>
         <xsl:attribute name="color">#454545</xsl:attribute>
+        <xsl:attribute name="text-align">center</xsl:attribute>
+        <xsl:attribute name="linefeed-treatment">preserve</xsl:attribute>
     </xsl:attribute-set>
     <xsl:attribute-set name="header.style">
         <xsl:attribute name="letter-spacing">2pt</xsl:attribute>
         <xsl:attribute name="font-family">Helvetica,sans-serif</xsl:attribute>
         <xsl:attribute name="font-size">6pt</xsl:attribute>
         <xsl:attribute name="color">#454545</xsl:attribute>
-        <xsl:attribute name="text-align">left</xsl:attribute>
+        <xsl:attribute name="text-align">center</xsl:attribute>
+        <xsl:attribute name="linefeed-treatment">preserve</xsl:attribute>
     </xsl:attribute-set>
     <xsl:attribute-set name="page.number">
         <xsl:attribute name="font-family">Helvetica,sans-serif</xsl:attribute>

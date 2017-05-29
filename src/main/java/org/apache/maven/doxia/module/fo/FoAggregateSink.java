@@ -916,13 +916,15 @@ public class FoAggregateSink
     {
         writeStartTag( STATIC_CONTENT_TAG, "flow-name", "xsl-region-before" );
         writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.6875in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.8425in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "0.625in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.1666in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.1666in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.1666in" );
         writeStartTag( TABLE_BODY_TAG, "" );
         writeStartTag( TABLE_ROW_TAG, "" );
         writeStartTag( TABLE_CELL_TAG, "" );
         writeStartTag( BLOCK_TAG, "header.style" );
+        
+        //
         
         if ( chapterName != null )
         {
@@ -934,8 +936,6 @@ public class FoAggregateSink
         
         writeStartTag( TABLE_CELL_TAG, "" );
         writeStartTag( BLOCK_TAG, "header.style" );
-        
-        
         if ( headerText != null )
         {
             write( headerText );
@@ -963,15 +963,13 @@ public class FoAggregateSink
     protected void regionAfter( String footerText )
     {
         writeStartTag( STATIC_CONTENT_TAG, "flow-name", "xsl-region-after" );
-        //writeStartTag( BLOCK_TAG, "footer.style" );
-        writeln( "<fo:block  letter-spacing=\"2pt\" font-family=\"Helvetica,sans-serif\" font-size=\"6pt\" color=\"#454545\" text-align=\"center\"  >" );
+        writeStartTag( BLOCK_TAG, "footer.style" );
        
         if ( footerText != null )
         {
             write( footerText );
         }
-        writeln( "</fo:block>" );
-        //writeEndTag( BLOCK_TAG );
+        writeEndTag( BLOCK_TAG );
         writeEndTag( STATIC_CONTENT_TAG );
     }
 

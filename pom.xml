@@ -69,8 +69,10 @@ under the License.
     <doxiaVersion>1.7</doxiaVersion>
     <doxiaSitetoolsVersion>1.7.4</doxiaSitetoolsVersion>
     <mavenVersion>2.2.1</mavenVersion>
-    <pdf.footer>A custom footer!</pdf.footer>
-    <pdf.header>A custom header! </pdf.header>
+    <timestamp>${maven.build.timestamp}</timestamp>
+   <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+    <pdf.footer>Some contet &#xA;Second line content &#xA;Third line content &#xA; Version ${project.version} &#xA; ${timestamp}</pdf.footer>
+    <pdf.header>Some contet &#xA;Second line content &#xA;Third line content &#xA; Version ${project.version} &#xA; ${timestamp}</pdf.header>
      <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         
