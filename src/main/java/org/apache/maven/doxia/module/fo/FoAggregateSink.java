@@ -917,14 +917,16 @@ public class FoAggregateSink
         writeStartTag( TABLE_BODY_TAG, "" );
         writeStartTag( TABLE_ROW_TAG, "" );
         writeStartTag( TABLE_CELL_TAG, "" );
-        writeStartTag( BLOCK_TAG, "header.style" );
-
+        //writeStartTag( BLOCK_TAG, "header.style" );
+        writeln( "<fo:block  letter-spacing=\"2pt\" font-family=\"Helvetica,sans-serif\" font-size=\"6pt\" color=\"#454545\" text-align=\"center\"  >" );
+        
         if ( headerText != null )
         {
             write( headerText );
         }
 
-        writeEndTag( BLOCK_TAG );
+        writeln( "</fo:block>" );
+        //writeEndTag( BLOCK_TAG );
         writeEndTag( TABLE_CELL_TAG );
         writeStartTag( TABLE_CELL_TAG, "" );
         writeStartTag( BLOCK_TAG, "page.number" );
@@ -945,14 +947,15 @@ public class FoAggregateSink
     protected void regionAfter( String footerText )
     {
         writeStartTag( STATIC_CONTENT_TAG, "flow-name", "xsl-region-after" );
-        writeStartTag( BLOCK_TAG, "footer.style" );
-
+        //writeStartTag( BLOCK_TAG, "footer.style" );
+ writeln( "<fo:block  letter-spacing=\"2pt\" font-family=\"Helvetica,sans-serif\" font-size=\"6pt\" color=\"#454545\" text-align=\"center\"  >" );
+       
         if ( footerText != null )
         {
             write( footerText );
         }
-
-        writeEndTag( BLOCK_TAG );
+writeln( "</fo:block>" );
+        //writeEndTag( BLOCK_TAG );
         writeEndTag( STATIC_CONTENT_TAG );
     }
 
