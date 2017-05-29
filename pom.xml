@@ -24,7 +24,7 @@ under the License.
   
     <groupId>com.github.spyhunter99</groupId>
     <artifactId>maven-pdf-plugin</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.5</version>
     <packaging>maven-plugin</packaging>
 
     <name>Apache Maven PDF Plugin Fork</name>
@@ -53,7 +53,7 @@ under the License.
         <connection>scm:git:https://github.com/spyhunter99/maven-pdf-plugin.git</connection>
         <developerConnection>scm:git:https://github.com/spyhunter99/maven-pdf-plugin.git</developerConnection>
         <url>https://github.com/spyhunter99/maven-pdf-plugin.git</url>
-        <tag>HEAD</tag>
+        <tag>MPDF-1.5</tag>
     </scm>
   
     <issueManagement>
@@ -86,8 +86,16 @@ under the License.
         <mavenVersion>2.2.1</mavenVersion>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-        <pdf.footer>Some contet &#xA;Second line content &#xA;Third line content &#xA; Version ${project.version} &#xA; ${timestamp}</pdf.footer>
-        <pdf.header>Some contet &#xA;Second line content &#xA;Third line content &#xA; Version ${project.version} &#xA; ${timestamp}</pdf.header>
+        <pdf.footer>Some contet 
+Second line content 
+Third line content 
+ Version ${project.version} 
+ ${timestamp}</pdf.footer>
+        <pdf.header>Some contet 
+Second line content 
+Third line content 
+ Version ${project.version} 
+ ${timestamp}</pdf.header>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         
