@@ -60,10 +60,23 @@ under the License.
         <system>Github</system>
         <url>https://github.com/spyhunter99/maven-pdf-plugin/issues</url>
     </issueManagement>
-    <distributionManagement>
+
+  <distributionManagement>
+        <repository>
+            <id>sonatype-release</id>
+            <layout>default</layout>
+            <name>sonatype releases</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <id>sonatype-snapshot</id>
+            <layout>default</layout>
+            <name>sonatype releases</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <site>
-            <id>apache.website</id>
-            <url>scm:svn:https://svn.apache.org/repos/infra/websites/production/maven/components/${maven.site.path}</url>
+            <id>website</id>
+            <url>https://github.com/spyhunter99/maven-pdf-plugin</url>
         </site>
     </distributionManagement>
 
