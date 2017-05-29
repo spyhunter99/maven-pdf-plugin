@@ -583,7 +583,7 @@ under the License.
         
          <!-- START SNIPPET: release-profile -->
         <profile>
-            <id>apache-release</id>
+            <id>MPDF-release</id>
 
            
             <build>
