@@ -916,8 +916,8 @@ public class FoAggregateSink
     {
         writeStartTag( STATIC_CONTENT_TAG, "flow-name", "xsl-region-before" );
         writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.8125in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.8125in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.6875in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.8425in" );
         writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "0.625in" );
         writeStartTag( TABLE_BODY_TAG, "" );
         writeStartTag( TABLE_ROW_TAG, "" );
