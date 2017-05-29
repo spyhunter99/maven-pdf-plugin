@@ -403,11 +403,6 @@ public class PdfMojo
         throws MojoExecutionException, MojoFailureException
     {
         init();
-        getLog().info( docRenderer.getClass().getCanonicalName() );
-        getLog().info( this.doxia.getClass().getCanonicalName() );
-        getLog().info( this.siteRenderer.getClass().getCanonicalName() );
-        getLog().info( this.foRenderer.getClass().getCanonicalName() );
-        getLog().info( this.siteTool.getClass().getCanonicalName() );
 
         try
         {

@@ -198,7 +198,7 @@ public class FoSink
     {
         init();
 
-        startPageSequence( "0", null, null );
+        startPageSequence( "0", null, null, null );
     }
 
     /** {@inheritDoc} */
@@ -1725,10 +1725,10 @@ public class FoSink
      * @param headerText The text to write in the header, if null, nothing is written.
      * @param footerText The text to write in the footer, if null, nothing is written.
      */
-    protected void startPageSequence( String initPageNumber, String headerText, String footerText )
+    protected void startPageSequence( String initPageNumber, String chapterName, String headerText, String footerText )
     {
         writeln( "<fo:page-sequence initial-page-number=\"" + initPageNumber + "\" master-reference=\"body\">" );
-        regionBefore( headerText );
+        regionBefore( chapterName, headerText );
         regionAfter( footerText );
         writeln( "<fo:flow flow-name=\"xsl-region-body\">" );
         chapterHeading( null, true );
@@ -1739,7 +1739,7 @@ public class FoSink
      *
      * @param headerText The text to write in the header, if null, nothing is written.
      */
-    protected void regionBefore( String headerText )
+    protected void regionBefore( String chapterName, String headerText )
     {
         // do nothing, overridden by AggregateSink
     }

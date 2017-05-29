@@ -267,7 +267,7 @@ public class FoAggregateSink
 
         resetSectionCounter();
 
-        startPageSequence( getHeaderText(), getFooterText() );
+        startPageSequence( getChapterName(), getHeaderText(), getFooterText() );
 
         if ( docName == null )
         {
@@ -755,15 +755,15 @@ public class FoAggregateSink
      * @param headerText The text to write in the header, if null, nothing is written.
      * @param footerText The text to write in the footer, if null, nothing is written.
      */
-    protected void startPageSequence( String headerText, String footerText )
+    protected void startPageSequence( String chapterName, String headerText, String footerText )
     {
         if ( chapter == 1 )
         {
-            startPageSequence( "0", headerText, footerText );
+            startPageSequence( "0", chapterName, headerText, footerText );
         }
         else
         {
-            startPageSequence( "auto", headerText, footerText );
+            startPageSequence( "auto", chapterName, headerText, footerText );
         }
     }
 
@@ -788,8 +788,7 @@ public class FoAggregateSink
                     boolean hasOverride = ( Boolean ) containsKey.invoke ( context, "pdf.header" );
                     if ( hasOverride ) 
                     {
-                        return Integer.toString( chapter ) + "   " + docTitle + "   " 
-                                + escaped( ( String ) method.invoke ( context, "pdf.header" ), false );
+                        return escaped( ( String ) method.invoke ( context, "pdf.header" ), false );
                     }
                 } 
                 catch ( NoSuchMethodException ex    ) 
@@ -815,6 +814,10 @@ public class FoAggregateSink
             }
         }
         
+        return "";
+    }
+    
+    protected String getChapterName(){
         return Integer.toString( chapter ) + "   " + docTitle;
     }
 
@@ -908,26 +911,39 @@ public class FoAggregateSink
      * <p/>
      * Writes a 'xsl-region-before' block.
      */
-    protected void regionBefore( String headerText )
+    @Override
+    protected void regionBefore( String chapterName, String headerText )
     {
         writeStartTag( STATIC_CONTENT_TAG, "flow-name", "xsl-region-before" );
         writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "5.625in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.8125in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.8125in" );
         writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "0.625in" );
         writeStartTag( TABLE_BODY_TAG, "" );
         writeStartTag( TABLE_ROW_TAG, "" );
         writeStartTag( TABLE_CELL_TAG, "" );
-        //writeStartTag( BLOCK_TAG, "header.style" );
-        writeln( "<fo:block  letter-spacing=\"2pt\" font-family=\"Helvetica,sans-serif\" font-size=\"6pt\" color=\"#454545\" text-align=\"center\"  >" );
+        writeStartTag( BLOCK_TAG, "header.style" );
+        
+        if ( chapterName != null )
+        {
+            write( chapterName );
+        }
+
+        writeEndTag( BLOCK_TAG );
+        writeEndTag( TABLE_CELL_TAG );
+        
+        writeStartTag( TABLE_CELL_TAG, "" );
+        writeStartTag( BLOCK_TAG, "header.style" );
+        
         
         if ( headerText != null )
         {
             write( headerText );
         }
-
-        writeln( "</fo:block>" );
-        //writeEndTag( BLOCK_TAG );
+        writeEndTag( BLOCK_TAG );
         writeEndTag( TABLE_CELL_TAG );
+
+        
         writeStartTag( TABLE_CELL_TAG, "" );
         writeStartTag( BLOCK_TAG, "page.number" );
         writeEmptyTag( PAGE_NUMBER_TAG, "" );
@@ -948,13 +964,13 @@ public class FoAggregateSink
     {
         writeStartTag( STATIC_CONTENT_TAG, "flow-name", "xsl-region-after" );
         //writeStartTag( BLOCK_TAG, "footer.style" );
- writeln( "<fo:block  letter-spacing=\"2pt\" font-family=\"Helvetica,sans-serif\" font-size=\"6pt\" color=\"#454545\" text-align=\"center\"  >" );
+        writeln( "<fo:block  letter-spacing=\"2pt\" font-family=\"Helvetica,sans-serif\" font-size=\"6pt\" color=\"#454545\" text-align=\"center\"  >" );
        
         if ( footerText != null )
         {
             write( footerText );
         }
-writeln( "</fo:block>" );
+        writeln( "</fo:block>" );
         //writeEndTag( BLOCK_TAG );
         writeEndTag( STATIC_CONTENT_TAG );
     }
@@ -1026,7 +1042,7 @@ writeln( "</fo:block>" );
         DocumentTOC toc = docModel.getToc();
 
         writeln( "<fo:page-sequence master-reference=\"toc\" initial-page-number=\"1\" format=\"i\">" );
-        regionBefore( toc.getName() );
+        regionBefore( toc.getName(), getHeaderText() );
         
         regionAfter( getFooterText() );
         writeStartTag( FLOW_TAG, "flow-name", "xsl-region-body" );
