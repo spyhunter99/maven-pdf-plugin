@@ -15,12 +15,12 @@ Setup your headers/footers
 	<properties>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-        <pdf.footer>Some contet 
+        <pdf.footer>Some content 
             Second line content 
             Third line content 
             Version ${project.version} 
             ${timestamp}</pdf.footer>
-        <pdf.header>Some contet 
+        <pdf.header>Some content 
             Second line content 
             Third line content 
             Version ${project.version} 
