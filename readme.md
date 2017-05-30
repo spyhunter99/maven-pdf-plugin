@@ -1,4 +1,4 @@
-# A hacked version of the Apache Maven PDF Plugin
+# A modified version of the Apache Maven PDF Plugin
 
 Primary deltas
 
@@ -36,7 +36,7 @@ then add to your build via this
 			<plugin>
 				<groupId>com.github.spyhunter99</groupId>
 				<artifactId>maven-pdf-plugin</artifactId>
-				<version>1.5.1</version>
+				<version>1.5.0.1</version>
                 <executions>
                     <execution>
                       <id>pdf-user</id>
@@ -55,4 +55,4 @@ then add to your build via this
             </plugin>
 		</plugins>
 	</build>
-xml
+```
