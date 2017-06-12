@@ -265,7 +265,7 @@ public class FoSinkTest
     protected String getNumberedListBlock( String item )
     {
         String attribs = getConfig().getAttributeString( "list" );
-        String itemAttribs = getConfig().getAttributeString( "list.item" );
+        String itemAttribs = getConfig().getAttributeString( "list.item.numbered" );
         return EOL + EOL + "<fo:list-block" + attribs + ">" + EOL + "<fo:list-item" + itemAttribs + ">" + EOL
             + "<fo:list-item-label>" + EOL + "<fo:block>i.</fo:block>" + EOL + "</fo:list-item-label>" + EOL + EOL
             + "<fo:list-item-body" + itemAttribs + ">" + EOL + "<fo:block>" + item + "</fo:block>" + EOL
