@@ -636,7 +636,7 @@ public class FoSink
         NumberedListItem current = this.listStack.peek();
         current.next();
 
-        writeStartTag( LIST_ITEM_TAG, "list.item" );
+        writeStartTag( LIST_ITEM_TAG, "list.item.numbered" );
 
         writeEOL();
         writeStartTag( LIST_ITEM_LABEL_TAG );
@@ -648,7 +648,7 @@ public class FoSink
         writeEndTag( LIST_ITEM_LABEL_TAG );
         writeEOL();
 
-        writeStartTag( LIST_ITEM_BODY_TAG, "list.item" );
+        writeStartTag( LIST_ITEM_BODY_TAG, "list.item.numbered" );
         writeEOL();
         writeStartTag( BLOCK_TAG );
     }

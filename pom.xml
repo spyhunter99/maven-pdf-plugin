@@ -497,6 +497,18 @@ under the License.
                             <includeReports>false</includeReports>
                         </configuration>
                     </execution>
+					<execution>
+                        <id>pdf2</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>pdf</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.reporting.outputDirectory}</outputDirectory>
+                            <includeReports>false</includeReports>
+							<docDescriptor>src/site/pdf2.xml</docDescriptor>
+                        </configuration>
+                    </execution>
                 </executions>
                 <version>${project.version}</version>
             </plugin>

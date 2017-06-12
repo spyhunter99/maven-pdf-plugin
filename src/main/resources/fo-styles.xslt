@@ -242,6 +242,13 @@
         <xsl:attribute name="space-before">0.15em</xsl:attribute>
         <xsl:attribute name="space-after">0.25em</xsl:attribute>
     </xsl:attribute-set>
+    <xsl:attribute-set name="list.item.numbered">
+        <!-- bump up the 1.5 to a larger value if you have lists greater than 100 -->
+        <xsl:attribute name="start-indent">inherited-property-value(start-indent) + 1.5em</xsl:attribute>
+        <xsl:attribute name="space-before">0.15em</xsl:attribute>
+        <xsl:attribute name="space-after">0.25em</xsl:attribute>
+    </xsl:attribute-set>
+    
     <xsl:attribute-set name="dl" use-attribute-sets="body.text">
         <xsl:attribute name="start-indent">1em</xsl:attribute>
         <xsl:attribute name="end-indent">1em</xsl:attribute>
