@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8" ?>
 
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
@@ -103,16 +103,6 @@ under the License.
         <mavenVersion>2.2.1</mavenVersion>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-        <pdf.footer>Some contet 
-            Second line content 
-            Third line content 
-            Version ${project.version} 
-            ${timestamp}</pdf.footer>
-        <pdf.header>Some contet 
-            Second line content 
-            Third line content 
-            Version ${project.version} 
-            ${timestamp}</pdf.header>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         
@@ -483,13 +473,14 @@ under the License.
         <plugins>
             <!-- START SNIPPET: configuration -->
             <plugin>
-                <groupId>${project.groupId}</groupId>
+                <groupId>com.github.spyhunter99</groupId>
                 <artifactId>maven-pdf-plugin</artifactId>
+				<version>${project.version}</version>
                 <executions>
                     <execution>
-                        <id>pdf</id>
+                    	<id>pdf</id>
                         <phase>site</phase>
-                        <goals>
+						<goals>
                             <goal>pdf</goal>
                         </goals>
                         <configuration>
@@ -507,10 +498,29 @@ under the License.
                             <outputDirectory>${project.reporting.outputDirectory}</outputDirectory>
                             <includeReports>false</includeReports>
 							<docDescriptor>src/site/pdf2.xml</docDescriptor>
+							<executiveSummaryName>EXSUM</executiveSummaryName>
+							<titleHeader>A custom header only on the title pages</titleHeader>
+							<!-- the distribution statement is printed on the title page towards the bottom, common use case:
+								confidentiality statements, limited distribution, legalese and other mumbo jumbo.-->
+        					<distributionStatement>DISTRIBUTION STATEMENT: Feel free to give this document to anyone you will take it.</distributionStatement>
+							
+							<!-- these header/footer definitions are used on all pages exception the title page -->
+        					<pdfFooter>Some contet 
+				            Second line content 
+				            Third line content 
+				            Version ${project.version} 
+				            ${timestamp}</pdfFooter>
+					        <pdfHeader>Some contet 
+				            Second line content 
+				            Third line content 
+				            Version ${project.version} 
+				            ${timestamp}</pdfHeader>
+							<!-- the cover page can have a pom defined date too, use "auto" to auto populate -->
+							<pdfCoverDate>1970-1-1</pdfCoverDate>
                         </configuration>
                     </execution>
                 </executions>
-                <version>${project.version}</version>
+                
             </plugin>
             <!-- END SNIPPET: configuration -->
         </plugins>
@@ -611,6 +621,14 @@ under the License.
                         <groupId>${project.groupId}</groupId>
                         <artifactId>maven-pdf-plugin</artifactId>
                         <version>${project.version}</version>
+                        <executions>
+		                    <execution>
+		                    	<id>pdf</id>
+		                        <goals>
+		                            <goal>pdf</goal>
+		                        </goals>
+		                    </execution>
+		                </executions>
                     </plugin>
                 </plugins>
             </build>

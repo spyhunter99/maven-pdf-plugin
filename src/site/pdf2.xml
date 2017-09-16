@@ -22,7 +22,8 @@ under the License.
 <!-- START SNIPPET: docDescriptor -->
 <document xmlns="http://maven.apache.org/DOCUMENT/1.0.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/DOCUMENT/1.0.1 http://maven.apache.org/xsd/document-1.0.1.xsd"
+  xsi:schemaLocation="http://maven.apache.org/DOCUMENT/1.0.1 
+  http://maven.apache.org/xsd/document-1.0.1.xsd"
   outputName="maven-pdf-plugin2">
 
   <meta>
@@ -31,11 +32,14 @@ under the License.
   </meta>
 
   <toc name="Table of Contents">
+  <!--this EXSUM doc is rendered before the TOC, but only if it's defined as such in 
+      the pom config -->
+    <item name="EXSUM" ref="exsum.md"/>
     <item name="Introduction" ref="index.apt"/>
     <item name="Usage" ref="usage.apt.vm"/>
     <item name="Markdown Source" ref="helloWorld.md"/>
     <item name="Filtering Document Descriptor" ref="examples/filtering.apt"/>
-    <item name="Configuring Reports" ref="/examples/configuring-reports.xml.vm"/>
+    <item name="Configuring Reports" ref="examples/configuring-reports.xml.vm"/>
     <item name="Limitations" ref="limitations.apt"/>
     <item name="FAQ" ref="faq.fml"/>
   </toc>
@@ -48,6 +52,8 @@ under the License.
     <projectLogo>http://maven.apache.org/images/maventxt_logo_200.gif</projectLogo>
     <companyName>The Apache Software Foundation</companyName>
     <companyLogo>http://www.apache.org/images/asf_logo_wide.png</companyLogo>
+	<author>First Last, mail@address, 867-5309</author>
+
   </cover>
 </document>
 <!-- END SNIPPET: docDescriptor -->
