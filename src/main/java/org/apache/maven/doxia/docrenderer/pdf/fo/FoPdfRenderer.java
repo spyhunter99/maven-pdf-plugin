@@ -76,7 +76,7 @@ public class FoPdfRenderer
     public void render( Map<String, ParserModule> filesToProcess, File outputDirectory, DocumentModel documentModel )
         throws DocumentRendererException, IOException
     {
-        render( filesToProcess, outputDirectory, documentModel, null );
+    	render( filesToProcess, outputDirectory, documentModel, null );
     }
 
     /** {@inheritDoc} */
@@ -85,9 +85,9 @@ public class FoPdfRenderer
                         DocumentRendererContext context )
         throws DocumentRendererException, IOException
     {
-        // copy resources, images, etc.
+    	// copy resources, images, etc.
         copyResources( outputDirectory );
-
+        
         if ( documentModel == null )
         {
             getLogger().debug( "No document model, generating all documents individually." );
@@ -111,6 +111,7 @@ public class FoPdfRenderer
         }
 
         Writer writer = null;
+        String exsumName = null;
         try
         {
             writer = WriterFactory.newXmlWriter( outputFOFile );
@@ -125,6 +126,8 @@ public class FoPdfRenderer
                 getLogger().debug( "Loaded pdf config file: " + fOConfigFile.getAbsolutePath() );
             }
 
+            DocumentRendererContext drContext = sink.getRendererContext();
+            
             String generateTOC =
                 ( context != null && context.get( "generateTOC" ) != null )
                         ? context.get( "generateTOC" ).toString().trim()
@@ -144,15 +147,93 @@ public class FoPdfRenderer
             }
             sink.setDocumentModel( documentModel, tocPosition );
 
+            String hrefExsum = null;
+            DocumentTOCItem tocItemExsum = null;
+            boolean exsum=false;
+            
+            DocumentTOC toc = documentModel.getToc();
+            java.util.Vector<DocumentTOCItem> newList = new java.util.Vector<DocumentTOCItem>();
+            
+            if( toc!=null )
+            {
+            	
+            	for( DocumentTOCItem item : toc.getItems() )
+            	{
+            		String href = null;
+            		boolean tmpExsum = false;
+            		if( item!=null )
+            		{
+            			
+                        if( drContext!=null )
+                        {
+                        		Object tmp = context.get("executiveSummaryName");
+                        	
+                        		if( tmp!=null ) exsumName = tmp.toString();//sink.getPomProperty("pdf.executivesummaryname");
+                        }
+                        if( item.getName() != null && item.getName().trim().equalsIgnoreCase(exsumName)  )
+            			{
+            				newList.add(0, item);
+            				exsum = true;
+            				tmpExsum = true;
+            				hrefExsum = href;
+            				tocItemExsum = item;
+            			}
+                        else 
+            			{
+            				newList.addElement(item);
+            			}
+            			
+            			href = StringUtils.replace( item.getRef(), "\\", "/" );
+        	            if ( href.lastIndexOf( '.' ) != -1 )
+        	            {
+        	                href = href.substring( 0, href.lastIndexOf( '.' ) );
+        	            }
+        	            if( tmpExsum )
+        	            {
+        	            	hrefExsum = href;
+        	            }
+            		}
+            		
+    	            
+            	}
+            	toc.setItems(newList);
+            }
+
             sink.beginDocument();
-
+            
+            //removing TOC and ExSum from the TOC has to be here, to make sure both are still in the bookmarks
+            DocumentTOCItem dti = null;
+            for( int i=newList.size()-1; i>=0 ; i-- )
+            {
+            	dti= newList.elementAt(i);
+            	if( dti!=null )
+            	{
+            		if( dti.getName().equals(exsumName) ||
+            				dti.getRef().equals("./toc") )
+            			newList.remove(i);
+            	}
+            }
+            toc.setItems(newList);
+            
             sink.coverPage();
-
+            
+            if( exsum )
+            {
+            	sink.activatePriorPageWriting(true);
+            	sink.setDocumentTitle(tocItemExsum.getName());
+            	sink.setDocumentName(tocItemExsum.getRef());
+            	sink.execSum(documentModel, exsumName);
+            	renderModules( hrefExsum, sink, tocItemExsum, context );
+            	sink.activatePriorPageWriting(false);
+            	sink.resetPageCounter();
+            }
+            
             if ( tocPosition == FoAggregateSink.TOC_START )
             {
                 sink.toc();
             }
-
+            sink.resetPageCounter();
+            sink.setChapter(0);
             if ( ( documentModel.getToc() == null ) || ( documentModel.getToc().getItems() == null ) )
             {
                 getLogger().info( "No TOC is defined in the document descriptor. Merging all documents." );
@@ -270,18 +351,29 @@ public class FoPdfRenderer
 
                 continue;
             }
-
-            String href = StringUtils.replace( tocItem.getRef(), "\\", "/" );
-            if ( href.lastIndexOf( '.' ) != -1 )
+            
+            String exsumName = null;
+            if( context!=null )
             {
-                href = href.substring( 0, href.lastIndexOf( '.' ) );
+            		Object tmp = context.get("executiveSummaryName");
+            	
+            		if( tmp!=null ) exsumName = tmp.toString();//sink.getPomProperty("pdf.executivesummaryname");
             }
 
-            renderModules( href, sink, tocItem, context );
-
-            if ( tocItem.getItems() != null )
+            if( !tocItem.getName().trim().equalsIgnoreCase(exsumName) )
             {
-                parseTocItems( tocItem.getItems(), sink, context );
+	            String href = StringUtils.replace( tocItem.getRef(), "\\", "/" );
+	            if ( href.lastIndexOf( '.' ) != -1 )
+	            {
+	                href = href.substring( 0, href.lastIndexOf( '.' ) );
+	            }
+	
+	            renderModules( href, sink, tocItem, context );
+	
+	            if ( tocItem.getItems() != null )
+	            {
+	                parseTocItems( tocItem.getItems(), sink, context );
+	            }
             }
         }
     }
@@ -318,7 +410,7 @@ public class FoPdfRenderer
     
                     if ( source.exists() )
                     {
-                        sink.setDocumentName( doc );
+                    	sink.setDocumentName( doc );
                         sink.setDocumentTitle( tocItem.getName() );
     
                         parse( source.getPath(), module.getParserId(), sink, context );

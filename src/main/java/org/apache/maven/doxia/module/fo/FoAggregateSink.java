@@ -1,5 +1,7 @@
 package org.apache.maven.doxia.module.fo;
 
+import java.io.File;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -35,6 +37,7 @@ import java.util.Stack;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML.Tag;
 
+import org.apache.maven.doxia.docrenderer.DocumentRendererContext;
 import org.apache.maven.doxia.document.DocumentCover;
 import org.apache.maven.doxia.document.DocumentMeta;
 import org.apache.maven.doxia.document.DocumentModel;
@@ -93,7 +96,7 @@ public class FoAggregateSink
     public static final int TOC_END = 2;
 
     // TODO: make configurable
-    private static final String COVER_HEADER_HEIGHT = "1.5in";
+    private static final String COVER_HEADER_HEIGHT = "0.5in";//"1.5in";
 
     /**
      * The document model to be used by this sink.
@@ -129,6 +132,10 @@ public class FoAggregateSink
      * expected DocumentRendererContext
      */
     private Object context = null;
+    
+    private boolean writingPriorPage = false;
+    
+    private boolean resetPageCounter = false;
     
     /**
      * Used to get the current position in the TOC.
@@ -263,11 +270,12 @@ public class FoAggregateSink
      */
     public void body( SinkEventAttributes attributes )
     {
-        chapter++;
+    	chapter++;
 
         resetSectionCounter();
 
-        startPageSequence( getChapterName(), getHeaderText(), getFooterText() );
+        if( !writingPriorPage )
+        	startPageSequence( getChapterName(), getHeaderText(), getFooterText() );
 
         if ( docName == null )
         {
@@ -421,6 +429,96 @@ public class FoAggregateSink
     //
     // -----------------------------------------------------------------------
 
+    /**
+     * Looks in the current working-directory for the passed subpath.
+     * @param subpath the subpath that is to be found
+     * @return the absolute path of the subpath, if exists anywhere below the current position, otherwise null. If the passed subpath is null, null is returned.
+     */
+    private String findAbsolutePath(String subpath)
+    {
+    	if( subpath==null )return null;
+    	
+    	String res = new String(subpath);
+    	
+    	if( subpath!=null && !subpath.contains("://") && !subpath.contains(":\\") && !subpath.startsWith("/") )
+    	{
+    		String tmpPath = StringUtils.replace(subpath, "\\", "/");
+    		String[] levels = StringUtils.split(tmpPath, "/");
+    		
+    		File tmp = new File(".");
+    		
+    		if( levels!=null )
+    		{
+				File targetFile = findTargetFile(tmp, levels, levels[levels.length-1]);
+				if( targetFile!=null)
+				{
+    				String absPath = targetFile.getAbsolutePath();
+    				if( absPath!=null )
+    				{
+    					res = StringUtils.replace(absPath, "\\.\\", "/");
+    					res = StringUtils.replace(res, "/./", "/");
+    					res = StringUtils.replace(res, "\\", "/");
+    				}
+				}
+    			
+    		}
+    		
+    	}
+    	
+    	return res;
+    }
+    
+    /**
+     * Looks for a specific file, that is defined by subpath and filename, somewhere in the current directory or in the childrens paths
+     * @param currentPosition current working directory
+     * @param pathlevels the subpath if the searched file
+     * @param targetFilename the filename of the searched file
+     * @return the File-Object, if the searched file exists somewhere in the current working directory, 
+     * its children or any subpath (passed subpath must be contained within the absolute path) from here. 
+     * Returns null, if file does not exist.
+     */
+    private File findTargetFile(File currentPosition, String[] pathlevels, String targetFilename)
+    {
+    	File res = null;
+    	
+    	if( currentPosition!=null && targetFilename!= null )
+    	{
+    		File[] children = currentPosition.listFiles();
+    		if( children!=null )
+    		{
+    			for( File f:children )
+    			{
+    				if( res==null )
+    				{
+	    				if( f.getName().equals(targetFilename) )
+	    					res = f;
+	    				else
+	    					res = findTargetFile(f, pathlevels, targetFilename);
+
+	    				if( res!=null && pathlevels.length>1 )
+	    				{
+	    					File tmp = res;
+	    					boolean match = true;
+	    					for( int i=pathlevels.length-2; i>=0 && match && tmp!=null; i-- )
+	    					{
+	    						File tmpUp = tmp.getParentFile();
+
+	    						if( tmpUp==null || !tmpUp.getName().equals(pathlevels[i]) )
+	    						{
+	    							match = false;
+	    						}
+	    						tmp = tmpUp;
+	    					}
+	    					if( !match ) res = null;
+	    				}
+    				}
+    			}
+    		}
+    	}
+    	
+    	return res;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -757,9 +855,10 @@ public class FoAggregateSink
      */
     protected void startPageSequence( String chapterName, String headerText, String footerText )
     {
-        if ( chapter == 1 )
+        if ( chapter == 1 || resetPageCounter )
         {
             startPageSequence( "0", chapterName, headerText, footerText );
+            resetPageCounter = false;
         }
         else
         {
@@ -770,11 +869,96 @@ public class FoAggregateSink
     /**
      * Returns the text to write in the header of each page.
      *
-     * @return String
+     * @return String that contains the headers text, if defined in pom-file, otherwise empty string is returned
      */
     protected String getHeaderText()
     {
+    	String res ="";
+    	
         if ( context != null ) 
+        {
+        	
+        	DocumentRendererContext drContext = getRendererContext();
+        	if( drContext!=null)
+        	{
+        		Object tmp = drContext.get("pdfHeader");
+        		if( tmp!=null )
+        			res = tmp.toString();
+            }
+        	
+            
+        }
+        
+        return res;
+    }
+    
+    
+    protected String getChapterName(){
+        return Integer.toString( chapter ) + "   " + docTitle;
+    }
+
+    /**
+     * Returns the text to write in the footer of each page.
+     *
+     * @return String that contains the footers text, if defined in pom-file, otherwise empty string is returned
+     */
+    protected String getFooterText()
+    {
+    	String res ="";
+    	if ( context != null ) 
+        {
+    		if ( context != null ) 
+            {
+            	
+            	DocumentRendererContext drContext = getRendererContext();
+            	if( drContext!=null)
+            	{
+            		Object tmp = drContext.get("pdfFooter");
+            		if( tmp!=null )
+            			res = tmp.toString();
+                }
+            	
+            }
+        }else
+        {
+	        int actualYear;
+	        String add = " &#8226; " + getBundle( Locale.US ).getString( "footer.rights" );
+	        String companyName = "";
+	
+	        if ( docModel != null && docModel.getMeta() != null && docModel.getMeta().isConfidential() )
+	        {
+	            add = add + " &#8226; " + getBundle( Locale.US ).getString( "footer.confidential" );
+	        }
+	
+	        if ( docModel != null && docModel.getCover() != null && docModel.getCover().getCompanyName() != null )
+	        {
+	            companyName = docModel.getCover().getCompanyName();
+	        }
+	
+	        if ( docModel != null && docModel.getMeta() != null && docModel.getMeta().getDate() != null )
+	        {
+	            Calendar date = Calendar.getInstance();
+	            date.setTime( docModel.getMeta().getDate() );
+	            actualYear = date.get( Calendar.YEAR );
+	        }
+	        else
+	        {
+	            actualYear = Calendar.getInstance().get( Calendar.YEAR );
+	        }
+	        
+	        res = "&#169;" + actualYear + ", " + escaped( companyName, false ) + add;
+        }
+        return res;
+    }
+
+    /**
+     * Reflection-method to get a properties value from the pom-file
+     * @param propertyName the name of the property
+     * @return the properties value as a String, if defined, otherwise an empty String is returned
+     */
+    public String getPomProperty(String propertyName)
+    {
+    	if ( context != null ) 
         {
             //developer commentary, this part uses reflection because the class DocumentRenderer
             //is not available in this classpath. 
@@ -785,10 +969,10 @@ public class FoAggregateSink
                 {
                     Method method = context.getClass( ).getMethod ( "get", String.class );
                     Method containsKey = context.getClass( ).getMethod ( "containsKey", Object.class );
-                    boolean hasOverride = ( Boolean ) containsKey.invoke ( context, "pdf.header" );
+                    boolean hasOverride = ( Boolean ) containsKey.invoke ( context, propertyName );
                     if ( hasOverride ) 
                     {
-                        return escaped( ( String ) method.invoke ( context, "pdf.header" ), false );
+                        return escaped( ( String ) method.invoke ( context, propertyName ), false );
                     }
                 } 
                 catch ( NoSuchMethodException ex    ) 
@@ -817,85 +1001,6 @@ public class FoAggregateSink
         return "";
     }
     
-    protected String getChapterName(){
-        return Integer.toString( chapter ) + "   " + docTitle;
-    }
-
-    /**
-     * Returns the text to write in the footer of each page.
-     *
-     * @return String
-     */
-    protected String getFooterText()
-    {
-        if ( context != null ) 
-        {
-            //developer commentary, this part uses reflection because the class DocumentRenderer
-            //is not available in this classpath. 
-            if ( context.getClass( ).getCanonicalName( ).
-                    equals( "org.apache.maven.doxia.docrenderer.DocumentRendererContext" ) )
-            {
-                try 
-                {
-                    Method method = context.getClass( ).getMethod ( "get", String.class );
-                    Method containsKey = context.getClass( ).getMethod ( "containsKey", Object.class );
-                    boolean hasOverride = ( Boolean ) containsKey.invoke ( context, "pdf.footer" );
-                    if ( hasOverride ) 
-                    {
-                        return escaped( ( String ) method.invoke ( context, "pdf.footer" ), false );
-                    }
-                } 
-                catch ( NoSuchMethodException ex    ) 
-                {
-                    getLog().debug( "error trapped looking for footer override", ex );
-                } 
-                catch ( SecurityException ex ) 
-                {
-                    getLog().debug( "error trapped looking for footer override", ex );
-                } 
-                catch ( IllegalAccessException ex ) 
-                {
-                    getLog().debug( "error trapped looking for footer override", ex );
-                } 
-                catch ( IllegalArgumentException ex ) 
-                {
-                    getLog().debug( "error trapped looking for footer override", ex );
-                } 
-                catch ( InvocationTargetException ex ) 
-                {
-                    getLog().debug( "error trapped looking for footer override", ex );
-                }
-            }
-        }
-        
-        int actualYear;
-        String add = " &#8226; " + getBundle( Locale.US ).getString( "footer.rights" );
-        String companyName = "";
-
-        if ( docModel != null && docModel.getMeta() != null && docModel.getMeta().isConfidential() )
-        {
-            add = add + " &#8226; " + getBundle( Locale.US ).getString( "footer.confidential" );
-        }
-
-        if ( docModel != null && docModel.getCover() != null && docModel.getCover().getCompanyName() != null )
-        {
-            companyName = docModel.getCover().getCompanyName();
-        }
-
-        if ( docModel != null && docModel.getMeta() != null && docModel.getMeta().getDate() != null )
-        {
-            Calendar date = Calendar.getInstance();
-            date.setTime( docModel.getMeta().getDate() );
-            actualYear = date.get( Calendar.YEAR );
-        }
-        else
-        {
-            actualYear = Calendar.getInstance().get( Calendar.YEAR );
-        }
-
-        return "&#169;" + actualYear + ", " + escaped( companyName, false ) + add;
-    }
-
     /**
      * {@inheritDoc}
      * <p/>
@@ -943,12 +1048,14 @@ public class FoAggregateSink
         writeEndTag( BLOCK_TAG );
         writeEndTag( TABLE_CELL_TAG );
 
-        
-        writeStartTag( TABLE_CELL_TAG, "" );
-        writeStartTag( BLOCK_TAG, "page.number" );
-        writeEmptyTag( PAGE_NUMBER_TAG, "" );
-        writeEndTag( BLOCK_TAG );
-        writeEndTag( TABLE_CELL_TAG );
+        if( !writingPriorPage )
+        {
+	        writeStartTag( TABLE_CELL_TAG, "" );
+	        writeStartTag( BLOCK_TAG, "page.number" );
+	        writeEmptyTag( PAGE_NUMBER_TAG, "" );
+	        writeEndTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+        }
         writeEndTag( TABLE_ROW_TAG );
         writeEndTag( TABLE_BODY_TAG );
         writeEndTag( TABLE_TAG );
@@ -1070,13 +1177,17 @@ public class FoAggregateSink
         {
             return;
         }
-
+        
         tocStack.push( new NumberedListItem( NUMBERING_DECIMAL ) );
 
+        boolean unNumberedItem = false;
+//        if( level > 1)
+//        	unNumberedItem = false;
+        
         for ( DocumentTOCItem tocItem : tocItems )
         {
             String ref = getIdName( tocItem.getRef() );
-
+            
             writeStartTag( TABLE_ROW_TAG, "keep-with-next", "auto" );
 
             if ( level > 2 )
@@ -1088,16 +1199,25 @@ public class FoAggregateSink
                     writeEndTag( TABLE_CELL_TAG );
                 }
             }
+            
+            if( !unNumberedItem )
+            {
+            	writeStartTag( TABLE_CELL_TAG, "toc.cell" );
+                writeStartTag( BLOCK_TAG, "toc.number.style" );
 
-            writeStartTag( TABLE_CELL_TAG, "toc.cell" );
-            writeStartTag( BLOCK_TAG, "toc.number.style" );
+                NumberedListItem current = tocStack.peek();
+                
+                current.next();
+            	write( currentTocNumber() );
+            	
+            	writeEndTag( BLOCK_TAG );
+                writeEndTag( TABLE_CELL_TAG );
 
-            NumberedListItem current = tocStack.peek();
-            current.next();
-            write( currentTocNumber() );
+            }else
+            	setChapter(0);
 
-            writeEndTag( BLOCK_TAG );
-            writeEndTag( TABLE_CELL_TAG );
+//            writeEndTag( BLOCK_TAG );
+//            writeEndTag( TABLE_CELL_TAG );
 
             String span = "3";
 
@@ -1109,14 +1229,20 @@ public class FoAggregateSink
             writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", span, "toc.cell" );
             MutableAttributeSet atts = getFoConfiguration().getAttributeSet( "toc.h" + level + ".style" );
             atts.addAttribute( "text-align-last", "justify" );
+
             writeStartTag( BLOCK_TAG, atts );
             writeStartTag( BASIC_LINK_TAG, "internal-destination", ref );
             text( tocItem.getName() );
             writeEndTag( BASIC_LINK_TAG );
-            writeEmptyTag( LEADER_TAG, "toc.leader.style" );
-            writeStartTag( INLINE_TAG, "page.number" );
-            writeEmptyTag( PAGE_NUMBER_CITATION_TAG, "ref-id", ref );
-            writeEndTag( INLINE_TAG );
+            if( unNumberedItem )
+            	writeEmptyTag( LEADER_TAG, "" );
+            else
+            {
+            	writeEmptyTag( LEADER_TAG, "toc.leader.style" );
+            	writeStartTag( INLINE_TAG, "page.number" );
+            	writeEmptyTag( PAGE_NUMBER_CITATION_TAG, "ref-id", ref );
+            	writeEndTag( INLINE_TAG );
+            }
             writeEndTag( BLOCK_TAG );
             writeEndTag( TABLE_CELL_TAG );
             writeEndTag( TABLE_ROW_TAG );
@@ -1125,6 +1251,9 @@ public class FoAggregateSink
             {
                 writeTocItems( tocItem.getItems(), level + 1 );
             }
+            
+            if( tocItem.getRef().equals("./toc"))
+            	unNumberedItem=false;
         }
 
         tocStack.pop();
@@ -1182,11 +1311,74 @@ public class FoAggregateSink
     }
 
     /**
+     * Document styles, defined in fo-styles.xslt, comtain the pageformat and margins in inches. The value is followed by the letters 'in'.
+     * This function removes the measurement unit from the value and converts it into a double-value.
+     * @param inch a floating-point-value as a string, followed by 'in' (e.g. "8.25in")
+     * @return the requested value as double if valid, otherwise Double.NaN is returned
+     */
+    private Double inchFromString(String inch)
+    {
+    	Double res = null;
+    	
+    	if( inch!=null )
+    	{
+    		if(inch.endsWith("in"))
+    		{
+    			res = Double.parseDouble(inch.substring(0, inch.length()-2));
+    			
+    		}
+    	}
+    	
+    	return res;
+    }
+    
+    /**
+     * Writes the executive summary, if it exists and is defined as first item in TOC
+     * @Parameter exsumName the (localized) title of the executive summary
+     */
+    public void execSum(DocumentModel model, String exsumName)
+    {
+    	writeln( "<fo:page-sequence master-reference=\"body\" initial-page-number=\"0\" format=\"i\">" );
+    	
+        regionBefore( exsumName, getHeaderText() );
+        
+        regionAfter( getFooterText() );
+        
+        writeStartTag( FLOW_TAG, "flow-name", "xsl-region-body" );
+        chapterHeading(null, false);
+        
+    }
+    
+    /**
+     * Casts the Object that represents the DocumentRendererContext to an object of the class DocumentRendererContext.
+     * @return the DocumentRendererContext, if exists and cast worked, otherwise null is returned
+     */
+    public DocumentRendererContext getRendererContext()
+    {
+    	DocumentRendererContext res = null;
+    	
+    	if( context!=null && context instanceof DocumentRendererContext )
+        {
+        	res = (DocumentRendererContext) context;
+        }
+    	
+    	return res;
+    }
+    
+    /**
+     * Closes the executive summary page.
+     */
+    public void closeExecSum()
+    {
+        writeEndTag( PAGE_SEQUENCE_TAG );
+    }
+    
+    /**
      * Writes a cover page. The DocumentModel has to contain a DocumentMeta for this to work.
      */
     public void coverPage()
     {
-        if ( this.docModel == null )
+    	if ( this.docModel == null )
         {
             return;
         }
@@ -1199,186 +1391,190 @@ public class FoAggregateSink
             return; // no information for cover page: ignore
         }
 
-        // TODO: remove hard-coded settings
+        String pageSize = "USLetter";
+        String titleHeader = "";
+        if( meta!=null )
+        {
+        	pageSize = meta.getPageSize();
+        }
+        
+        
+    	DocumentRendererContext drContext = getRendererContext();
+    	if( drContext!=null)
+    	{
+    		Object tmp = drContext.get("titleHeader");
+    		if( tmp!=null )
+    			titleHeader = tmp.toString();
+        }
+    	
+        MutableAttributeSet attBase = getFoConfiguration().getAttributeSet( "layout.master.set.base" );
 
-        writeStartTag( PAGE_SEQUENCE_TAG, "master-reference", "cover-page" );
-        writeStartTag( FLOW_TAG, "flow-name", "xsl-region-body" );
-        writeStartTag( BLOCK_TAG, "text-align", "center" );
-        writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "3.125in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "3.125in" );
-        writeStartTag( TABLE_BODY_TAG );
-
-        writeCoverHead( cover );
-        writeCoverBody( cover, meta );
-        writeCoverFooter( cover, meta );
-
-        writeEndTag( TABLE_BODY_TAG );
-        writeEndTag( TABLE_TAG );
-        writeEndTag( BLOCK_TAG );
-        writeEndTag( FLOW_TAG );
+        double paperWidthInInch = 8.5;
+        double paperHeightInInch = 11.00;
+        
+        //since margins are not defined in any available object but in the fo-styles.xslt these are hard coded at this point
+        //for backup-reasons if the following extraction does not work
+        double marginTopInInch = 0.625;
+        double marginBottomInInch = 0.6;
+        double marginLeftInInch = 1.0;
+        double marginRightInInch = 1.0;
+        
+        if( pageSize!=null )
+        {
+	        if( pageSize.equalsIgnoreCase("A4") )
+	        {
+	        	paperWidthInInch = 8.26;
+	        	paperHeightInInch= 11.69;
+	        }else if( pageSize.equalsIgnoreCase("US" ) )
+	        {
+	        	paperWidthInInch = 8.5;
+	        	paperHeightInInch= 14.00;
+	        }
+        }
+        
+        //more precise if possible
+        if( attBase!=null )
+        {
+        	Double tmpWidth = inchFromString( attBase.getAttribute("page-width").toString());
+        	Double tmpHeight= inchFromString( attBase.getAttribute("page-height").toString());
+        	Double tmpBaseMarginTop = inchFromString( attBase.getAttribute("margin-top").toString());
+        	Double tmpBaseMarginBottom = inchFromString( attBase.getAttribute("margin-bottom").toString());
+        	Double tmpBaseMarginLeft = inchFromString( attBase.getAttribute("margin-left").toString());
+        	Double tmpBaseMarginRight= inchFromString( attBase.getAttribute("margin-right").toString());
+        	
+        	if( tmpWidth!=null && tmpWidth>=0.0d )
+        		paperWidthInInch = tmpWidth.doubleValue();
+        	if( tmpHeight!=null && tmpHeight>=0.0d )
+        		paperHeightInInch = tmpHeight.doubleValue();
+        	if( tmpBaseMarginTop!=null && tmpBaseMarginTop>=0.0d )
+        		marginTopInInch = tmpBaseMarginTop.doubleValue();
+        	if( tmpBaseMarginBottom!=null && tmpBaseMarginBottom>=0.0d )
+        		marginBottomInInch = tmpBaseMarginBottom.doubleValue();
+        	if( tmpBaseMarginLeft!=null && tmpBaseMarginLeft>=0.0d )
+        		marginLeftInInch = tmpBaseMarginLeft.doubleValue();
+        	if( tmpBaseMarginRight!=null && tmpBaseMarginRight>=0.0d )
+        		marginRightInInch = tmpBaseMarginRight.doubleValue();
+        }
+        
+        double availableWidthInInch = paperWidthInInch-marginLeftInInch-marginRightInInch;
+        double availableHeightInInch= paperHeightInInch-marginTopInInch-marginBottomInInch;
+        
+        writeln( "<fo:page-sequence master-reference=\"cover-page\">");// initial-page-number=\"1\" format=\"i\">" );
+        writeCoverHead(cover, availableWidthInInch, titleHeader);
+        writeCoverFooter(titleHeader);
+        writeCoverBody(cover, availableWidthInInch, availableHeightInInch, meta);
+        
         writeEndTag( PAGE_SEQUENCE_TAG );
     }
-
-    private void writeCoverHead( DocumentCover cover )
+    
+    /**
+     * Writes the header to the cover-page. DocumentCover has to be defined for this work.
+     * @param cover the DocumentCover
+     * @param availableWidth the available width (overall width - margins (left and right))
+     * @param titleHeader the titleHeader string that shall be written to the header
+     */
+    private void writeCoverHead( DocumentCover cover, double availableWidth, String titleHeader)
     {
-        if ( cover == null )
+    	if ( cover == null )
         {
             return;
         }
 
-        String compLogo = cover.getCompanyLogo();
-        String projLogo = cover.getProjectLogo();
-
-        writeStartTag( TABLE_ROW_TAG, "height", COVER_HEADER_HEIGHT );
-        writeStartTag( TABLE_CELL_TAG );
-
-        if ( StringUtils.isNotEmpty( compLogo ) )
-        {
-            SinkEventAttributeSet atts = new SinkEventAttributeSet();
-            atts.addAttribute( "text-align", "left" );
-            atts.addAttribute( "vertical-align", "top" );
-            writeStartTag( BLOCK_TAG, atts );
-            figureGraphics( compLogo, getGraphicsAttributes( compLogo ) );
-            writeEndTag( BLOCK_TAG );
-        }
-
-        writeSimpleTag( BLOCK_TAG );
+    	double columnWidth5Cols = availableWidth/5.0d;
+        
+        MutableAttributeSet att = getFoConfiguration().getAttributeSet( "cover.subtitle" );
+        att.addAttribute("height", "2in");
+        
+        writeStartTag( STATIC_CONTENT_TAG, "flow-name", "xsl-region-before" );
+        writeStartTag( BLOCK_TAG, "text-align", "center" );
+        writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");//"2.1666in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");//"2.1666in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");//"2.1666in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");//"2.1666in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");//"2.1666in" );
+        writeStartTag( TABLE_BODY_TAG );//, "" );
+        writeStartTag( TABLE_ROW_TAG );//, "" );
+        
+        //titleHeader
+        writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "5");
+        writeStartTag( BLOCK_TAG, "cover.header");//"header.style");
+        writeln( titleHeader );//.toUpperCase() );
+        writeEndTag( BLOCK_TAG );
         writeEndTag( TABLE_CELL_TAG );
-        writeStartTag( TABLE_CELL_TAG );
-
-        if ( StringUtils.isNotEmpty( projLogo ) )
-        {
-            SinkEventAttributeSet atts = new SinkEventAttributeSet();
-            atts.addAttribute( "text-align", "right" );
-            atts.addAttribute( "vertical-align", "top" );
-            writeStartTag( BLOCK_TAG, atts );
-            figureGraphics( projLogo, getGraphicsAttributes( projLogo ) );
-            writeEndTag( BLOCK_TAG );
-        }
-
+        writeEndTag( TABLE_ROW_TAG );
+        
+        //spacing between titleHeader and company-logo
+        writeStartTag( TABLE_ROW_TAG );
+        writeStartTag( TABLE_CELL_TAG, "height", "0.3in" );//, "number-columns-spanned", "3");
         writeSimpleTag( BLOCK_TAG );
         writeEndTag( TABLE_CELL_TAG );
         writeEndTag( TABLE_ROW_TAG );
+        
+        writeEndTag( TABLE_BODY_TAG );
+        writeEndTag( TABLE_TAG );
+        writeEndTag( BLOCK_TAG );
+        writeEndTag( STATIC_CONTENT_TAG );
     }
-
-    private void writeCoverBody( DocumentCover cover, DocumentMeta meta )
+    
+    /**
+     * Writes the body of the cover (including logos, title, POC, distribution statement) to the coverpage
+     * @TODO the vertical dimension is not optimized for very small sizes yet. Should be fixed if the intend is to support booklets etc.
+     * @param cover the DocumentCover that contains cover-page metadata
+     * @param availableWidthInInch  the available width (overall width - margins (left and right))
+     * @param meta DocumentMeta (contains document title)
+     */
+    private void writeCoverBody( DocumentCover cover, double availableWidthInInch, double availableHeightInInch,DocumentMeta meta )
     {
-        if ( cover == null && meta == null )
+    	if ( cover == null && meta == null )
         {
             return;
         }
 
-        String subtitle = null;
+    	String subtitle = null;
         String title = null;
         String type = null;
-        String version = null;
+        String compLogo = null;
+        String projLogo = null;
+        String date = null;
+        String poc = null;
+        String distStatement = null;
+        String effectiveDate = null;
+        
+        //for testing, supposed to get moved to resources-file
+        distStatement = "";
+        
+        DocumentRendererContext drContext = getRendererContext();
+        if( drContext!=null )
+        {
+        	Object tmp = drContext.get("distributionStatement");
+        	if( tmp!=null )
+        		distStatement = tmp.toString();
+        	
+        	tmp = drContext.get("coverDate");
+        	if( tmp!=null )
+        		effectiveDate = tmp.toString();
+        }
+        
         if ( cover == null )
         {
             // aleady checked that meta != null
             getLog().debug( "The DocumentCover is not defined, using the DocumentMeta title as cover title." );
             title = meta.getTitle();
+            
         }
         else
         {
-            subtitle = cover.getCoverSubTitle();
+        	subtitle = cover.getCoverSubTitle();
             title = cover.getCoverTitle();
             type = cover.getCoverType();
-            version = cover.getCoverVersion();
-        }
-
-        writeln( "<fo:table-row keep-with-previous=\"always\" height=\"0.014in\">" );
-        writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "2" );
-        writeStartTag( BLOCK_TAG, "line-height", "0.014in" );
-        writeEmptyTag( LEADER_TAG, "chapter.rule" );
-        writeEndTag( BLOCK_TAG );
-        writeEndTag( TABLE_CELL_TAG );
-        writeEndTag( TABLE_ROW_TAG );
-
-        writeStartTag( TABLE_ROW_TAG, "height", "7.447in" );
-        writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "2" );
-        writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.083in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.083in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "2.083in" );
-
-        writeStartTag( TABLE_BODY_TAG );
-
-        writeStartTag( TABLE_ROW_TAG );
-        writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "3" );
-        writeSimpleTag( BLOCK_TAG );
-        writeEmptyTag( BLOCK_TAG, "space-before", "3.2235in" );
-        writeEndTag( TABLE_CELL_TAG );
-        writeEndTag( TABLE_ROW_TAG );
-
-        writeStartTag( TABLE_ROW_TAG );
-        writeStartTag( TABLE_CELL_TAG );
-        writeEmptyTag( BLOCK_TAG, "space-after", "0.5in" );
-        writeEndTag( TABLE_CELL_TAG );
-
-        writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "2", "cover.border.left" );
-        writeStartTag( BLOCK_TAG, "cover.title" );
-        text( title == null ? "" : title );
-        writeEndTag( BLOCK_TAG );
-        writeEndTag( TABLE_CELL_TAG );
-        writeEndTag( TABLE_ROW_TAG );
-
-        writeStartTag( TABLE_ROW_TAG );
-        writeStartTag( TABLE_CELL_TAG );
-        writeSimpleTag( BLOCK_TAG );
-        writeEndTag( TABLE_CELL_TAG );
-
-        writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "2", "cover.border.left.bottom" );
-        writeStartTag( BLOCK_TAG, "cover.subtitle" );
-        text( subtitle == null ? ( version == null ? "" : " v. " + version ) : subtitle );
-        writeEndTag( BLOCK_TAG );
-        writeStartTag( BLOCK_TAG, "cover.subtitle" );
-        text( type == null ? "" : type );
-        writeEndTag( BLOCK_TAG );
-        writeEndTag( TABLE_CELL_TAG );
-        writeEndTag( TABLE_ROW_TAG );
-
-        writeEndTag( TABLE_BODY_TAG );
-        writeEndTag( TABLE_TAG );
-
-        writeEndTag( TABLE_CELL_TAG );
-        writeEndTag( TABLE_ROW_TAG );
-
-        writeStartTag( TABLE_ROW_TAG, "height", "0.014in" );
-        writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "2" );
-        writeln( "<fo:block space-after=\"0.2in\" line-height=\"0.014in\">" );
-        writeEmptyTag( LEADER_TAG, "chapter.rule" );
-        writeEndTag( BLOCK_TAG );
-        writeEndTag( TABLE_CELL_TAG );
-        writeEndTag( TABLE_ROW_TAG );
-
-        writeStartTag( TABLE_ROW_TAG );
-        writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "2" );
-        writeSimpleTag( BLOCK_TAG );
-        writeEmptyTag( BLOCK_TAG, "space-before", "0.2in" );
-        writeEndTag( TABLE_CELL_TAG );
-        writeEndTag( TABLE_ROW_TAG );
-    }
-
-    private void writeCoverFooter( DocumentCover cover, DocumentMeta meta )
-    {
-        if ( cover == null && meta == null )
-        {
-            return;
-        }
-
-        String date = null;
-        String compName = null;
-        if ( cover == null )
-        {
-            // aleady checked that meta != null
-            getLog().debug( "The DocumentCover is not defined, using the DocumentMeta author as company name." );
-            compName = meta.getAuthor();
-        }
-        else
-        {
-            compName = cover.getCompanyName();
-
+            compLogo = (cover.getCompanyLogo());
+            projLogo = (cover.getProjectLogo());
+            String tmpAuthor =cover.getAuthor();
+            if( tmpAuthor!=null && !tmpAuthor.trim().isEmpty())
+            	poc = "POC: "+tmpAuthor;
+            else poc = "";
+            
             if ( cover.getCoverdate() == null )
             {
                 cover.setCoverDate( new Date() );
@@ -1390,30 +1586,432 @@ public class FoAggregateSink
                 date = cover.getCoverdate();
             }
         }
+        
+        if( effectiveDate!=null )
+        {
+        	if( effectiveDate.equalsIgnoreCase("auto") )
+        		effectiveDate = date;
+        	//otherwise there is a specific string that has to be printed on the cover-page as date
+        }
+        
+        double leftColumnWidth = 0.0d;
+        double rightColumnWidth= leftColumnWidth;
+        double midColumnWidth = availableWidthInInch-leftColumnWidth-rightColumnWidth;
+        
+        double logoCol1Width = availableWidthInInch/5.0d*2.0d;
+        double logoCol2Width = availableWidthInInch-logoCol1Width;
+        
+        
+        boolean containsCLogo = StringUtils.isNotEmpty( compLogo );
+        boolean containsPLogo = StringUtils.isNotEmpty( projLogo );
+        boolean containsType = StringUtils.isNotEmpty( type );
+        boolean containsPoc = StringUtils.isNotEmpty( poc );
+        boolean containsDistStatement = StringUtils.isNotEmpty( distStatement );
+        
+        //calcultation of free space to be filled by spacers
+        double compLogoHeight 	= 0.0d;
+        double projLogoHeight 	= 0.0d;
+        double titleHeight 		= 0.0d;
+        double subtitleHeight 	= 0.0d;
+        double typeHeight 		= 0.0d;
+        double dateHeight 		= 0.0d;
+        double pocHeight 		= 0.0d;
+        double distStateHeight 	= 0.0d;
+        
+        if ( containsCLogo )
+        {
+        	compLogo = StringUtils.replace(compLogo, '\\', '/');
+        	compLogo = findAbsolutePath(compLogo);
+        	SinkEventAttributeSet atts = getGraphicsAttributes( compLogo );
+            atts.addAttribute("content-width", ""+logoCol1Width+"in");
+            compLogoHeight = calculateImageHeight(atts);
+        }
+        if ( containsPLogo )
+        {
+        	projLogo = StringUtils.replace(projLogo, '\\', '/');
+        	projLogo = findAbsolutePath(projLogo);
+        	SinkEventAttributeSet atts = getGraphicsAttributes( projLogo );
+            atts.addAttribute("content-width", ""+midColumnWidth+"in");
+            projLogoHeight = calculateImageHeight(atts);
+        }
+        
+        MutableAttributeSet attTitle = getFoConfiguration().getAttributeSet( "cover.title" );
+        MutableAttributeSet attSubtitle = getFoConfiguration().getAttributeSet( "cover.subtitle" );
+        MutableAttributeSet attDate = getFoConfiguration().getAttributeSet( "cover.date" );
+        MutableAttributeSet attPOC = getFoConfiguration().getAttributeSet( "cover.poc" );
+        MutableAttributeSet attDistStat = getFoConfiguration().getAttributeSet( "cover.distributionstatement" );
+        titleHeight = extractFontHeightInInch(attTitle, 2);
+        subtitleHeight = extractFontHeightInInch(attSubtitle, 2);
+        typeHeight = extractFontHeightInInch(attSubtitle, 2);
+        dateHeight = extractFontHeightInInch(attDate, 2);
+        pocHeight = extractFontHeightInInch(attPOC, 2);
+        distStateHeight = extractFontHeightInInch(attDistStat, 2);
+        
+        
+        
+        //initial spacings in inch, to be (partly) scaled to fit the page
+        double spcHdrCLogo = 0.675d;
+        double spcCLogoPLogo = 0.5d;
+        double spcPLogoTitle = 0.5d;
+        double spcTitleSubT = 0.15d;
+        double spcSubTType	 = 0.3d;
+        double spcTypeDate	 = 0.5d;
+        double spcDatePoc	 = 0.6d;
+        double spcPocDist	 = 1.0d;
+        double spcDistFooter = 1.0d;
+        
+        double adjustableSpacers = spcCLogoPLogo+spcPLogoTitle+spcTitleSubT;        
+        double overAllHeightOfText = titleHeight+subtitleHeight;
+        
+        if ( containsType )
+        {
+        	adjustableSpacers+= spcSubTType;
+        	overAllHeightOfText+= typeHeight;
+        }
+        if ( containsPoc )
+        {
+        	adjustableSpacers+= spcDatePoc;
+        	overAllHeightOfText+= pocHeight;
+        }
+        if ( containsDistStatement )
+        {
+        	adjustableSpacers+= spcPocDist;
+        	overAllHeightOfText+= distStateHeight*3;
+        }
+        if( effectiveDate!=null )
+        {
+        	adjustableSpacers += spcTypeDate;
+        	overAllHeightOfText+= dateHeight;
+        }
+        
+        double tmpAvailableHeight = availableHeightInInch-spcHdrCLogo-spcDistFooter-overAllHeightOfText-compLogoHeight-projLogoHeight;
+        double spacersFactor = tmpAvailableHeight/adjustableSpacers;
 
-        writeStartTag( TABLE_ROW_TAG, "height", "0.3in" );
-
-        writeStartTag( TABLE_CELL_TAG );
-        MutableAttributeSet att = getFoConfiguration().getAttributeSet( "cover.subtitle" );
-        att.addAttribute( "height", "0.3in" );
-        att.addAttribute( "text-align", "left" );
-        writeStartTag( BLOCK_TAG, att );
-        text( compName == null ? ( cover.getAuthor() == null ? "" : cover.getAuthor() ) : compName );
-        writeEndTag( BLOCK_TAG );
+        spcCLogoPLogo 	*= spacersFactor;
+        spcPLogoTitle 	*= spacersFactor;
+        spcTitleSubT 	*= spacersFactor;
+        spcSubTType	 	*= spacersFactor;
+        spcTypeDate	 	*= spacersFactor;
+        spcDatePoc	 	*= spacersFactor;
+        spcPocDist	 	*= spacersFactor;
+        
+        //starting to build up document
+        writeStartTag( FLOW_TAG, "flow-name", "xsl-region-body" );
+        writeStartTag( BLOCK_TAG, "text-align", "center" );
+        writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+leftColumnWidth+"in");
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+midColumnWidth+"in");
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+rightColumnWidth+"in");
+        writeStartTag( TABLE_BODY_TAG );
+        
+        //spacing between header and company-logo
+        writeStartTag( TABLE_ROW_TAG );
+        writeStartTag( TABLE_CELL_TAG, "height", ""+spcHdrCLogo+"in" );
+        writeSimpleTag( BLOCK_TAG );
         writeEndTag( TABLE_CELL_TAG );
-
-        writeStartTag( TABLE_CELL_TAG );
-        att = getFoConfiguration().getAttributeSet( "cover.subtitle" );
-        att.addAttribute( "height", "0.3in" );
-        att.addAttribute( "text-align", "right" );
-        writeStartTag( BLOCK_TAG, att );
-        text( date == null ? "" : date );
-        writeEndTag( BLOCK_TAG );
-        writeEndTag( TABLE_CELL_TAG );
-
         writeEndTag( TABLE_ROW_TAG );
-    }
+        
+        //company logo
+        writeStartTag( TABLE_ROW_TAG );
+        writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "3" );
+        writeStartTag( BLOCK_TAG );
+        writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+logoCol1Width+"in");//"2.083in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+logoCol2Width+"in");//"2.083in" );
+        writeStartTag( TABLE_BODY_TAG );
+        writeStartTag( TABLE_ROW_TAG );
+        writeStartTag( TABLE_CELL_TAG, "height", ""+compLogoHeight+"in" );
+        
+        if ( StringUtils.isNotEmpty( compLogo ) )
+        {
+            SinkEventAttributeSet atts = getGraphicsAttributes( compLogo );
+            atts.removeAttribute("height");
+            atts.removeAttribute("width");
+            atts.addAttribute("width", logoCol1Width+"in");
+            atts.addAttribute("height", compLogoHeight+"in");
+            atts.addAttribute( "text-align", "left" );
+            atts.addAttribute( "vertical-align", "top" );
+            
+            writeStartTag( BLOCK_TAG, atts );
+            figureGraphics( compLogo, atts );
+            writeEndTag( BLOCK_TAG );
+        }else
+        {
+        	writeSimpleTag( BLOCK_TAG );
+        }
+        
+        writeEndTag( TABLE_CELL_TAG );
+        writeEndTag( TABLE_ROW_TAG );
+        writeEndTag( TABLE_BODY_TAG );
+        writeEndTag( TABLE_TAG );
+        writeEndTag( BLOCK_TAG );
+        
+        writeSimpleTag( BLOCK_TAG );
+        writeEndTag( TABLE_CELL_TAG );
+        writeEndTag( TABLE_ROW_TAG );
+        
+        //spacing between company-logo and project-logo
+        writeStartTag( TABLE_ROW_TAG );
+        writeStartTag( TABLE_CELL_TAG, "height", ""+spcCLogoPLogo+"in" );
+        writeSimpleTag( BLOCK_TAG );
+        writeEndTag( TABLE_CELL_TAG );
+        writeEndTag( TABLE_ROW_TAG );
+        
+        writeStartTag( TABLE_ROW_TAG );
+        //move logo to middle column
+        writeStartTag( TABLE_CELL_TAG );
+        writeSimpleTag( BLOCK_TAG );
+        writeEndTag( TABLE_CELL_TAG );
+        
+        //project-logo
+        if ( StringUtils.isNotEmpty( projLogo ) )
+        {
+        	writeStartTag( TABLE_CELL_TAG, "height", ""+projLogoHeight+"in"  );
+            SinkEventAttributes sea = getGraphicsAttributes( projLogo );
+            if(sea!=null )
+            {
+				sea.addAttribute("width", ""+midColumnWidth+"in");
+				sea.addAttribute("content-width", ""+midColumnWidth+"in");
+				sea.addAttribute("height", projLogoHeight+"in");
+				writeStartTag( BLOCK_TAG );//, sea );
+	            figureGraphics( projLogo, sea );
+            }
+            writeEndTag( BLOCK_TAG );
+            writeEndTag( TABLE_CELL_TAG );
+        }else
+        {
+          writeStartTag( TABLE_CELL_TAG );
+          writeSimpleTag( BLOCK_TAG );
+          writeEndTag( TABLE_CELL_TAG );
+        }
+        
+        writeEndTag( TABLE_ROW_TAG );
+        
+        //spacing between project-logo and title
+        writeStartTag( TABLE_ROW_TAG );
+        writeStartTag( TABLE_CELL_TAG, "height", ""+spcPLogoTitle+"in");//"0.5in" );
+        writeSimpleTag( BLOCK_TAG );
+        writeEndTag( TABLE_CELL_TAG );
+        writeEndTag( TABLE_ROW_TAG );
+        
+        //title
+        writeStartTag( TABLE_ROW_TAG );
+        writeStartTag( TABLE_CELL_TAG );
+        writeSimpleTag( BLOCK_TAG );
+        writeEndTag( TABLE_CELL_TAG );
+        
+        writeStartTag( TABLE_CELL_TAG );
+        writeStartTag( BLOCK_TAG, attTitle );
+        text( title == null ? "" : title );
+        writeEndTag( BLOCK_TAG );
+        writeEndTag( TABLE_CELL_TAG );
+        writeEndTag( TABLE_ROW_TAG );
 
+        //spacing between title and subtitle
+        writeStartTag( TABLE_ROW_TAG );
+        writeStartTag( TABLE_CELL_TAG, "height", ""+spcTitleSubT+"in" );
+        writeSimpleTag( BLOCK_TAG );
+        writeEndTag( TABLE_CELL_TAG );
+        writeEndTag( TABLE_ROW_TAG );
+        
+        //subtitle
+        writeStartTag( TABLE_ROW_TAG );
+        writeStartTag( TABLE_CELL_TAG );
+        writeSimpleTag( BLOCK_TAG );
+        writeEndTag( TABLE_CELL_TAG );
+        
+        writeStartTag( TABLE_CELL_TAG );
+        writeStartTag( BLOCK_TAG, attSubtitle );
+        text( subtitle == null ? "" : subtitle );
+        writeEndTag( BLOCK_TAG );
+        writeEndTag( TABLE_CELL_TAG );
+        writeEndTag( TABLE_ROW_TAG );
+
+        if( containsType )
+        {
+	        //spacing between subtitle and type
+	        writeStartTag( TABLE_ROW_TAG );
+	        writeStartTag( TABLE_CELL_TAG, "height", ""+spcSubTType+"in" );
+	        writeSimpleTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+	        writeEndTag( TABLE_ROW_TAG );
+	        
+	        //type
+	        writeStartTag( TABLE_ROW_TAG );
+	        writeStartTag( TABLE_CELL_TAG );
+	        writeSimpleTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+        
+	        writeStartTag( TABLE_CELL_TAG );
+	        writeStartTag( BLOCK_TAG, attSubtitle );
+	        text( type == null ? "" : type );
+	        writeEndTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+	        writeEndTag( TABLE_ROW_TAG );
+        }
+        
+        if( effectiveDate!=null )
+        {
+	        //spacing between type and date
+	        writeStartTag( TABLE_ROW_TAG );
+	        writeStartTag( TABLE_CELL_TAG, "height", ""+spcTypeDate+"in" );
+	        writeSimpleTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+	        writeEndTag( TABLE_ROW_TAG );
+	        
+	        //date
+	        writeStartTag( TABLE_ROW_TAG );
+	        writeStartTag( TABLE_CELL_TAG );
+	        writeSimpleTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+	        writeStartTag( TABLE_CELL_TAG );
+	        writeStartTag( BLOCK_TAG, attDate );
+	        text( date == null ? "" : effectiveDate );
+	        writeEndTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+	        writeEndTag( TABLE_ROW_TAG );
+        }
+        
+        //spacing between date and POC
+        if( containsPoc )
+        {
+	        writeStartTag( TABLE_ROW_TAG );
+	        writeStartTag( TABLE_CELL_TAG, "height", ""+spcDatePoc+"in" );
+	        writeSimpleTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+	        writeEndTag( TABLE_ROW_TAG );
+	        
+	        //poc
+	        writeStartTag( TABLE_ROW_TAG );
+	        writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "3" );
+	        writeStartTag( BLOCK_TAG, attPOC );
+	        text( poc == null ? "poc missing" : poc );
+	        writeEndTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+	        writeEndTag( TABLE_ROW_TAG );
+        }
+        
+        if( containsDistStatement )
+        {
+	        //spacing between poc and distribution statement
+	        writeStartTag( TABLE_ROW_TAG );
+	        writeStartTag( TABLE_CELL_TAG, "height", ""+spcPocDist+"in" );
+	        writeSimpleTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+	        writeEndTag( TABLE_ROW_TAG );
+	
+	        //distribution statement
+	        writeStartTag( TABLE_ROW_TAG );
+	        writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "3" );
+	        writeStartTag( BLOCK_TAG, attDistStat );
+	        text( distStatement == null ? "no distribution statment set" : distStatement );
+	        writeEndTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+	        writeEndTag( TABLE_ROW_TAG );
+        }
+        
+        //end so that the footer can be written
+        writeEndTag( TABLE_BODY_TAG );
+        writeEndTag( TABLE_TAG );
+        writeEndTag( BLOCK_TAG );
+        writeEndTag( FLOW_TAG );
+    }
+    
+    /**
+     * Estimates the font height in inches.
+     * @param mas MultipleAttributeSet that represents the font
+     * @param spacing additional amount if dots to seperate one line from another
+     * @return the inch-value of the height which is consumed by the a line of the font
+     */
+    private double extractFontHeightInInch( MutableAttributeSet mas, int spacing)
+    {
+    	double res = 0.0d;
+    	
+    	if( mas!=null )
+    	{
+    		Object oFtSize = mas.getAttribute("font-size");
+    		if( oFtSize!=null )
+    		{
+    			String strFtSize = oFtSize.toString();
+    			if( strFtSize.endsWith("pt") )
+    			{
+    				int pxHeight = Integer.parseInt(strFtSize.substring(0, strFtSize.length()-2));
+
+    				if( spacing>0 )
+    					pxHeight+=spacing;
+    				if( pxHeight>0 )
+    					res = pxHeight/72.0d; //72 dotsPerInch
+    			}
+    		}
+    	}
+    	
+    	return res;
+    }
+    
+    /**
+     * Calculates the height of an image in inch that is characterized by the passed SinkEventAttributeSet.
+     * @param seas the SinkEventAttributeSet that characterizes the image. "width", "height" and "content-width" 
+     * have to be defined in this object. "width" and "height" specify the size in pixels/dots, "content-width" is scaled in inches
+     * @return the image height in inches if input-data was like expected. Otherwise 0.0d
+     */
+    private double calculateImageHeight(SinkEventAttributeSet seas)
+    {
+    	double res =0.0d;
+    	
+    	if( seas!=null )
+    	{
+    		Object strPxWidth = seas.getAttribute("width");//.toString();
+    		Object strPxHeight= seas.getAttribute("height");//.toString();
+    		Object strContWidth = seas.getAttribute("content-width");//.toString();
+    		if( strPxWidth!=null && strPxHeight!=null && strContWidth!=null )
+    		{
+    			int pxWidth = Integer.parseInt(strPxWidth.toString());
+    			int pxHeight = Integer.parseInt(strPxHeight.toString());
+    			double contWidth = inchFromString(strContWidth.toString());
+
+    			res = calculateImageHeight(pxWidth, pxHeight, contWidth);
+    		}
+    	}
+    	
+    	return res;
+    }
+    
+    /**
+     * Calculates the height of an image in inch that is characterized by the passed parameters.
+     * @param pixelsWidth images width in pixels/dots
+     * @param pixelsHeight images height in pixels/dots 
+     * @param contentWidth images width in inches
+     * @return the image height in inches if input-data was like expected. Otherwise 0.0d
+     */
+    private double calculateImageHeight(int pixelsWidth, int pixelsHeight, double contentWidth)
+    {
+    	double res = 0.0d;
+    	
+    	if( pixelsWidth > 0 && pixelsHeight>0 &&contentWidth>0 )
+    	{
+    		res=contentWidth/pixelsWidth*pixelsHeight;
+    	}
+    	
+    	return res;
+    }
+    
+    /**
+     * Writes the footer to the cover-page.
+     * @param titleHeader the titleHeader that is to be written to the cover-pages footer
+     */
+    private void writeCoverFooter( String titleHeader )
+    {
+    	writeStartTag( STATIC_CONTENT_TAG, "flow-name", "xsl-region-after" );
+        writeStartTag( BLOCK_TAG, "cover.header");
+       
+        if ( titleHeader != null )
+        {
+            write( titleHeader );//.toUpperCase() );
+        }
+        writeEndTag( BLOCK_TAG );
+        writeEndTag( STATIC_CONTENT_TAG );
+    }
+    
     private ResourceBundle getBundle( Locale locale )
     {
         return ResourceBundle.getBundle( "doxia-fo", locale, this.getClass().getClassLoader() );
@@ -1447,5 +2045,20 @@ public class FoAggregateSink
         }
 
         return new SinkEventAttributeSet( atts );
+    }
+
+    public void activatePriorPageWriting(boolean skip)
+    {
+    	writingPriorPage = skip;
+    }
+    
+    public void resetPageCounter()
+    {
+    	resetPageCounter = true;
+    }
+    
+    public void setChapter(int chapterNumber)
+    {
+    	chapter = chapterNumber;
     }
 }

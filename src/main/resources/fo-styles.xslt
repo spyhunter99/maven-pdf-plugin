@@ -36,9 +36,16 @@
         <xsl:attribute name="master-name">cover-page</xsl:attribute>
     </xsl:attribute-set>
     <xsl:attribute-set name="layout.master.set.cover-page.region-body">
-        <xsl:attribute name="margin-top">0.7in</xsl:attribute>
+        <!-- <xsl:attribute name="margin-top">0.7in</xsl:attribute> -->
+        <xsl:attribute name="margin-top">0.0in</xsl:attribute>
     </xsl:attribute-set>
-
+    <xsl:attribute-set name="layout.master.set.cover-page.region-before">
+        <xsl:attribute name="extent">0.35in</xsl:attribute>
+    </xsl:attribute-set>
+    <xsl:attribute-set name="layout.master.set.cover-page.region-after">
+        <xsl:attribute name="extent">0.125in</xsl:attribute>
+    </xsl:attribute-set>
+    
     <xsl:attribute-set name="layout.master.set.cover-inside" use-attribute-sets="layout.master.set.base">
         <xsl:attribute name="master-name">cover-inside</xsl:attribute>
         <xsl:attribute name="margin-top">0in</xsl:attribute>
@@ -283,11 +290,11 @@
         <xsl:attribute name="font-family">Helvetica,sans-serif</xsl:attribute>
         <xsl:attribute name="color">#000000</xsl:attribute>
         <xsl:attribute name="keep-with-next">always</xsl:attribute>
-        <xsl:attribute name="font-size">16pt</xsl:attribute>
+        <xsl:attribute name="font-size">18pt</xsl:attribute>
         <xsl:attribute name="font-weight">bold</xsl:attribute>
-        <xsl:attribute name="text-align">left</xsl:attribute>
+        <xsl:attribute name="text-align">center</xsl:attribute>
         <xsl:attribute name="display-align">center</xsl:attribute>
-        <xsl:attribute name="space-after">0.5in</xsl:attribute>
+        <!-- <xsl:attribute name="space-after">0.5in</xsl:attribute> -->
     </xsl:attribute-set>
     <xsl:attribute-set name="cover.subtitle">
         <xsl:attribute name="font-family">Helvetica,sans-serif</xsl:attribute>
@@ -295,8 +302,51 @@
         <xsl:attribute name="keep-with-next">always</xsl:attribute>
         <xsl:attribute name="font-size">12pt</xsl:attribute>
         <xsl:attribute name="font-weight">bold</xsl:attribute>
-        <xsl:attribute name="text-align">left</xsl:attribute>
+        <xsl:attribute name="text-align">center</xsl:attribute>
         <xsl:attribute name="display-align">center</xsl:attribute>
+    </xsl:attribute-set>
+    <xsl:attribute-set name="cover.date">
+        <xsl:attribute name="font-family">Helvetica,sans-serif</xsl:attribute>
+        <xsl:attribute name="color">#000000</xsl:attribute>
+        <xsl:attribute name="keep-with-next">always</xsl:attribute>
+        <xsl:attribute name="font-size">20pt</xsl:attribute>
+        <xsl:attribute name="font-weight">bold</xsl:attribute>
+        <xsl:attribute name="text-align">center</xsl:attribute>
+        <xsl:attribute name="display-align">center</xsl:attribute>
+    </xsl:attribute-set>
+    <xsl:attribute-set name="cover.poc">
+        <xsl:attribute name="font-family">Helvetica,sans-serif</xsl:attribute>
+        <xsl:attribute name="color">#BEBEBE</xsl:attribute>
+        <xsl:attribute name="keep-with-next">always</xsl:attribute>
+        <xsl:attribute name="font-size">20pt</xsl:attribute>
+        <xsl:attribute name="font-weight">italic</xsl:attribute>
+        <xsl:attribute name="text-align">center</xsl:attribute>
+        <xsl:attribute name="display-align">center</xsl:attribute>
+    </xsl:attribute-set>
+    <xsl:attribute-set name="cover.distributionstatement">
+        <xsl:attribute name="font-family">Helvetica,sans-serif</xsl:attribute>
+        <xsl:attribute name="color">#000000</xsl:attribute>
+        <xsl:attribute name="keep-with-next">always</xsl:attribute>
+        <xsl:attribute name="font-size">12pt</xsl:attribute>
+        <xsl:attribute name="font-weight">italic</xsl:attribute>
+        <xsl:attribute name="text-align">left</xsl:attribute>
+        <!-- <xsl:attribute name="display-align">left</xsl:attribute> -->
+    </xsl:attribute-set>
+    <xsl:attribute-set name="cover.header">
+       <!-- <xsl:attribute name="font-family">Helvetica,sans-serif</xsl:attribute>
+        <xsl:attribute name="color">#000000</xsl:attribute>
+        <xsl:attribute name="keep-with-next">always</xsl:attribute>
+        <xsl:attribute name="font-size">12pt</xsl:attribute>
+        <xsl:attribute name="font-weight">italic</xsl:attribute>
+        <xsl:attribute name="text-align">center</xsl:attribute>
+        <xsl:attribute name="display-align">center</xsl:attribute>
+         --> 
+         <xsl:attribute name="letter-spacing">2pt</xsl:attribute>
+        <xsl:attribute name="font-family">Helvetica,sans-serif</xsl:attribute>
+        <xsl:attribute name="font-size">6pt</xsl:attribute>
+        <xsl:attribute name="color">#454545</xsl:attribute>
+        <xsl:attribute name="text-align">center</xsl:attribute>
+        <xsl:attribute name="linefeed-treatment">preserve</xsl:attribute>
     </xsl:attribute-set>
     <xsl:attribute-set name="cover.border.left" use-attribute-sets="base.pre.style">
         <xsl:attribute name="padding-start">0.2in</xsl:attribute>

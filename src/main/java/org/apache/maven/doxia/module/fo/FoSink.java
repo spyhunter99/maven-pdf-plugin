@@ -1426,6 +1426,8 @@ public class FoSink
 
         writeStartTag( SIMPLE_PAGE_MASTER_TAG, "layout.master.set.cover-page" );
         writeEmptyTag( REGION_BODY_TAG, "layout.master.set.cover-page.region-body" );
+        writeEmptyTag( REGION_BEFORE_TAG, "layout.master.set.cover-page.region-before" );
+        writeEmptyTag( REGION_AFTER_TAG, "layout.master.set.cover-page.region-after" );
         writeEndTag( SIMPLE_PAGE_MASTER_TAG );
         writeEOL();
 

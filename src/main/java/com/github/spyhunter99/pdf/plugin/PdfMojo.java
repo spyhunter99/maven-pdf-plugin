@@ -343,6 +343,52 @@ public class PdfMojo
     @Parameter( readonly = true )
     private org.apache.maven.reporting.exec.ReportPlugin[] reportPlugins;
 
+    /**
+     * Defines the displayed name of the executive summary. This name is for identifying the executive summary 
+     * within the toc, so it can be moved in front of it (between cover-page and toc).
+     * The executive summary has to be referenced in the toc with exact the same name (title). The filename does not matter for shifting within the final document.
+     * 
+     * @since 1.5.0.3-SNAPSHOT
+     */
+    @Parameter( property = "executiveSummaryName", defaultValue = "Executive Summary", readonly = false )
+    private String executiveSummaryName;
+
+    /**
+     * Title page header, this is only used on the title page
+     * 
+     * @since 1.5.0.3-SNAPSHOT
+     */
+    @Parameter( property = "titleHeader", defaultValue = "", readonly = false )
+    private String titleHeader;
+
+    /**
+     * Represents the distribution statement of the final document.
+     * 
+     * @since 1.5.0.3-SNAPSHOT
+     */
+    @Parameter( property = "distributionStatement", defaultValue = "", readonly = false )
+    private String distributionStatement;
+    
+    /**
+     * String to be printed as page-header
+     */
+    @Parameter( property = "pdfHeader")
+    private String pdfHeader;
+    
+    /**
+     * String to be printed as page-header
+     */
+    @Parameter( property = "pdfFooter")
+    private String pdfFooter;
+    
+    /**
+     * Defines a specific date that has to be printed on the cover-page.
+     * If not defined in pom-file or as empty string than no date is printed on the cover. If it is set to auto, the current date is printed.
+     * Otherwise the contained string is printed (without further format test)
+     */
+    @Parameter( property = "pdfCoverDate")
+    private String pdfCoverDate;
+
     // ----------------------------------------------------------------------
     // Instance fields
     // ----------------------------------------------------------------------
@@ -536,7 +582,14 @@ public class PdfMojo
             context.put( "i18n", i18n );
             context.put( "generateTOC", generateTOC );
             context.put( "validate", validate );
-
+            
+            context.put( "executiveSummaryName", executiveSummaryName );
+            context.put( "titleHeader", titleHeader );
+            context.put( "distributionStatement", distributionStatement );
+            context.put( "pdfHeader", pdfHeader );
+            context.put( "pdfFooter", pdfFooter );
+            context.put( "coverDate" , pdfCoverDate);
+            
             // Put any of the properties in directly into the Velocity context
             for ( Map.Entry<Object, Object> entry : project.getProperties().entrySet() )
             {
