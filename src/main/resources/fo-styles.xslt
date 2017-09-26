@@ -178,6 +178,11 @@
         <xsl:attribute name="font-style">italic</xsl:attribute>
         <xsl:attribute name="space-after">3pt</xsl:attribute>
     </xsl:attribute-set>
+    <xsl:attribute-set name="body.h6" use-attribute-sets="base.heading.style">
+        <xsl:attribute name="font-size">9.5pt</xsl:attribute>
+        <xsl:attribute name="font-style">italic</xsl:attribute>
+        <xsl:attribute name="space-after">3pt</xsl:attribute>
+    </xsl:attribute-set>
 
     <!-- Chapter heading styles -->
     <xsl:attribute-set name="chapter.title" use-attribute-sets="body.title">
@@ -544,7 +549,7 @@
     </xsl:attribute-set>
     <xsl:attribute-set name="toc.number.style">
         <xsl:attribute name="font-size">9.5pt</xsl:attribute>
-        <xsl:attribute name="text-align">end</xsl:attribute>
+        <xsl:attribute name="text-align">start</xsl:attribute>
         <xsl:attribute name="color">#A9A9A9</xsl:attribute>
         <xsl:attribute name="line-height">16pt</xsl:attribute>
         <xsl:attribute name="end-indent">6pt</xsl:attribute>
@@ -557,7 +562,7 @@
     <xsl:attribute-set name="toc.h2.style" use-attribute-sets="toc.base.style">
         <xsl:attribute name="font-size">11pt</xsl:attribute>
         <xsl:attribute name="space-before">15pt</xsl:attribute>
-        <xsl:attribute name="space-before">3pt</xsl:attribute>
+<!--         <xsl:attribute name="space-before">3pt</xsl:attribute> -->
     </xsl:attribute-set>
     <xsl:attribute-set name="toc.h3.style" use-attribute-sets="toc.base.style">
         <xsl:attribute name="font-size">10pt</xsl:attribute>
@@ -566,5 +571,16 @@
     <xsl:attribute-set name="toc.h4.style" use-attribute-sets="toc.base.style">
         <xsl:attribute name="font-size">9.5pt</xsl:attribute>
         <xsl:attribute name="space-before">4pt</xsl:attribute>
+    </xsl:attribute-set>
+<!--     <xsl:attribute-set name="toc.h5.style" use-attribute-sets="toc.base.style"> -->
+<!--         <xsl:attribute name="font-size">9pt</xsl:attribute> -->
+<!--         <xsl:attribute name="space-before">2pt</xsl:attribute> -->
+<!--     </xsl:attribute-set> -->
+<!--     <xsl:attribute-set name="toc.h6.style" use-attribute-sets="toc.base.style"> -->
+<!--         <xsl:attribute name="font-size">8.5pt</xsl:attribute> -->
+<!--         <xsl:attribute name="space-before">2pt</xsl:attribute> -->
+<!--     </xsl:attribute-set> -->
+    <xsl:attribute-set name="toc.hanging.indentation" use-attribute-sets="toc.base.style">
+        <xsl:attribute name="indentation">0.0in</xsl:attribute>
     </xsl:attribute-set>
 </xsl:stylesheet>

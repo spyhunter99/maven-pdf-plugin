@@ -354,12 +354,12 @@ public class PdfMojo
     private String executiveSummaryName;
 
     /**
-     * Title page header, this is only used on the title page
+     * Represents the documents classification (e.g. UNCLASSIFIED).
      * 
      * @since 1.5.0.3-SNAPSHOT
      */
-    @Parameter( property = "titleHeader", defaultValue = "", readonly = false )
-    private String titleHeader;
+    @Parameter( property = "classification", defaultValue = "", readonly = false )
+    private String classification;
 
     /**
      * Represents the distribution statement of the final document.
@@ -380,6 +380,12 @@ public class PdfMojo
      */
     @Parameter( property = "pdfFooter")
     private String pdfFooter;
+    
+    /**
+     * Defines the maximum depth of the "table of contents" to be printed.
+     */
+    @Parameter( property = "tocMaxDepthToPrint")
+    private String tocMaxDepthToPrint=null;
     
     /**
      * Defines a specific date that has to be printed on the cover-page.
@@ -584,11 +590,13 @@ public class PdfMojo
             context.put( "validate", validate );
             
             context.put( "executiveSummaryName", executiveSummaryName );
-            context.put( "titleHeader", titleHeader );
+            context.put( "classification", classification );
             context.put( "distributionStatement", distributionStatement );
             context.put( "pdfHeader", pdfHeader );
             context.put( "pdfFooter", pdfFooter );
             context.put( "coverDate" , pdfCoverDate);
+            if( tocMaxDepthToPrint!=null && !tocMaxDepthToPrint.trim().isEmpty() )
+            	context.put( "tocMaxDepthToPrint", tocMaxDepthToPrint);
             
             // Put any of the properties in directly into the Velocity context
             for ( Map.Entry<Object, Object> entry : project.getProperties().entrySet() )

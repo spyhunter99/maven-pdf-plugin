@@ -35,6 +35,7 @@ import java.util.ResourceBundle;
 import java.util.Stack;
 
 import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.html.HTML.Tag;
 
 import org.apache.maven.doxia.docrenderer.DocumentRendererContext;
@@ -133,8 +134,15 @@ public class FoAggregateSink
      */
     private Object context = null;
     
+    /**
+     * Writing pages netween cover-page and toc needs some changes to the standard-process.
+     * 
+     */
     private boolean writingPriorPage = false;
     
+    /**
+     * In order to write pages between cover-page and toc, it was neccessary to reset the page counter after these pages.
+     */
     private boolean resetPageCounter = false;
     
     /**
@@ -142,6 +150,23 @@ public class FoAggregateSink
      */
     private final Stack<NumberedListItem> tocStack = new Stack<NumberedListItem>();
 
+    /**
+     * During the cover-pages creation the value is set from the document-context and is used for defining the table of contents width afterwards.
+     */
+    private double availablePageWidthInInch = 0.0d;
+
+    private double tocColWidthC1 = 0.22d;
+    private double tocColWidthC2 = 0.38d;
+    private double tocColWidthC3 = 0.58d;
+    private double tocColWidthC4 = 0.76d;
+    private double tocColWidthC5 = 0.94d;
+    private double tocColWidthC6 = 1.12d;
+    private double tocColWidthC7 = 1.85d;
+    private double tocColWidthC8 = 0.10d;
+    private double tocColWidthC9 = 0.30d;
+    
+    
+	
     /**
      * Constructor.
      *
@@ -288,10 +313,10 @@ public class FoAggregateSink
 
     }
     
-    public void setContext( Object context ) 
-    {
-        this.context = context;
-    }
+//    public void setContext( Object context ) 
+//    {
+//        this.context = context;
+//    }
 
     /**
      * {@inheritDoc}
@@ -302,7 +327,7 @@ public class FoAggregateSink
         writeEndTag( BLOCK_TAG );
         writeEndTag( FLOW_TAG );
         writeEndTag( PAGE_SEQUENCE_TAG );
-
+        writeEOL();writeEOL();
         // reset document name
         docName = null;
     }
@@ -440,7 +465,7 @@ public class FoAggregateSink
     	
     	String res = new String(subpath);
     	
-    	if( subpath!=null && !subpath.contains("://") && !subpath.contains(":\\") && !subpath.startsWith("/") )
+    	if( !subpath.contains("://") && !subpath.contains(":\\") && !subpath.startsWith("/") )
     	{
     		String tmpPath = StringUtils.replace(subpath, "\\", "/");
     		String[] levels = StringUtils.split(tmpPath, "/");
@@ -488,14 +513,14 @@ public class FoAggregateSink
     		{
     			for( File f:children )
     			{
-    				if( res==null )
+    				if( res==null && f!=null )
     				{
 	    				if( f.getName().equals(targetFilename) )
 	    					res = f;
-	    				else
+	    				else if( f.isDirectory() )
 	    					res = findTargetFile(f, pathlevels, targetFilename);
 
-	    				if( res!=null && pathlevels.length>1 )
+	    				if( res!=null && pathlevels!=null && pathlevels.length>1 )
 	    				{
 	    					File tmp = res;
 	    					boolean match = true;
@@ -810,6 +835,7 @@ public class FoAggregateSink
         }
     }
 
+    
     /**
      * {@inheritDoc}
      * <p/>
@@ -1133,6 +1159,13 @@ public class FoAggregateSink
         writeEndTag( BLOCK_TAG );
     }
 
+    public void beginDocument()
+    {
+    	if ( docModel != null && docModel.getToc() != null)
+    	generateMissingInternalReferences(docModel.getToc());
+        super.beginDocument();
+    }
+    
     /**
      * Writes a table of contents. The DocumentModel has to contain a DocumentTOC for this to work.
      */
@@ -1144,20 +1177,36 @@ public class FoAggregateSink
             return;
         }
 
+        if( availablePageWidthInInch!=0.0d )
+        	tocColWidthC7 = (availablePageWidthInInch-	tocColWidthC1-
+        											tocColWidthC2-
+        											tocColWidthC3-
+        											tocColWidthC4-
+        											tocColWidthC5-
+        											tocColWidthC6-
+        											tocColWidthC8-
+        											tocColWidthC9);
+        
         DocumentTOC toc = docModel.getToc();
-
+        setDocTOC(toc);
+        
         writeln( "<fo:page-sequence master-reference=\"toc\" initial-page-number=\"1\" format=\"i\">" );
         regionBefore( toc.getName(), getHeaderText() );
-        
         regionAfter( getFooterText() );
         writeStartTag( FLOW_TAG, "flow-name", "xsl-region-body" );
         writeStartTag( BLOCK_TAG, "id", "./toc" );
         chapterHeading( toc.getName(), false );
         writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "0.45in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "0.4in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "0.4in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", "5in" ); // TODO {$maxBodyWidth - 1.25}in
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+tocColWidthC1+"in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+tocColWidthC2+"in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+tocColWidthC3+"in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+tocColWidthC4+"in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+tocColWidthC5+"in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+tocColWidthC6+"in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+tocColWidthC7+"in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+tocColWidthC8+"in" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+tocColWidthC9+"in" );// TODO {$maxBodyWidth - 1.25}in
+        
         writeStartTag( TABLE_BODY_TAG );
 
         writeTocItems( toc.getItems(), 1 );
@@ -1167,105 +1216,386 @@ public class FoAggregateSink
         writeEndTag( BLOCK_TAG );
         writeEndTag( FLOW_TAG );
         writeEndTag( PAGE_SEQUENCE_TAG );
+        writeEOL();writeEOL();
     }
 
+    private void generateMissingInternalReferences(DocumentTOC toc)
+    {
+    	if( toc!=null )
+    	{
+    		String pathToItem = ".";
+    		java.util.List<DocumentTOCItem> tocElements = toc.getItems();
+    		
+    		java.util.Vector<String> usedReferences = new java.util.Vector<String>();
+    		
+    		if( tocElements!=null )
+				for( DocumentTOCItem child : tocElements )
+				{
+					fixReferenceIfNeeded(child, new String(pathToItem), usedReferences);
+				}
+    	}
+    }
+    
+    /**
+     * Originally the table of contents was limited to the entries in pdf.xml.
+     * In this version the table of content is generated using the (sub-)chapter-structure of every toc-entry defined in the pdf.xml.
+     * Therefore these toc-items don't have any external reference that could be transformed into an internal.
+     * This function walkes through the TOC-Items to identify those without any reference and sets a new internal reference.
+     * @param tocItem the root-TOC-Item (recursive call)
+     * @param pathToItem the path through the TOC-Item-tree to the passed TOC-Item
+     * @param usedReferences list of all chapter-references that are already used (to ensure no reference is used twice or more times)
+     */
+    private void fixReferenceIfNeeded( DocumentTOCItem tocItem, String pathToItem, java.util.Vector<String> usedReferences)
+    {
+    	if( tocItem!=null )
+    	{
+    		String tocName = tocItem.getName();
+    		if( tocName!=null )
+    		{
+    			tocName = StringUtils.replace(tocName, ".", "_");
+    			tocName = StringUtils.replace(tocName, "\\", "_");
+    		}
+    		String itemID = new String(pathToItem+"/"+tocName);
+
+    		if( tocItem.getRef() ==null )
+    		{
+    			itemID = ensureReferenceIsValid(itemID, usedReferences);
+    			tocItem.setRef(itemID);
+    			usedReferences.addElement(itemID);
+    		}
+    		java.util.List<DocumentTOCItem> children = tocItem.getItems();
+			if( children!=null )
+				for( DocumentTOCItem child : children )
+				{
+					fixReferenceIfNeeded(child, itemID, usedReferences);
+				}
+    	}
+    }
+    
+    /**
+     * Tests if the passed reference is not defined previously.
+     * @param reference the reference that is to be checked of previous definition 
+     * @param usedReferences all references used before
+     * @return the reference if it is unique, otherwise a new unique reference is returned
+     */
+    private String ensureReferenceIsValid(String reference, java.util.Vector<String> usedReferences)
+    {
+    	String res = reference;
+    	
+    	if( reference !=null && usedReferences!=null )
+    	{
+    		boolean invalidReference = false;
+    		for( String tmp : usedReferences )
+    			if( tmp!=null && tmp.equals(res) )
+    				invalidReference = true;
+//    		System.out.println("invalid reference: "+reference);
+    		
+    		while(invalidReference)
+    		{
+//    			System.out.println("invalid reference: "+reference);
+    			res = res+"_";
+    			invalidReference = false;
+    			for( String tmp : usedReferences )
+        			if( tmp!=null && tmp.equals(res) )
+        				invalidReference = true;
+    		}
+    	}
+    	
+    	return res;
+    }
+    
     private void writeTocItems( List<DocumentTOCItem> tocItems, int level )
     {
-        final int maxTocLevel = 4;
+        int maxTocLevel = 4;//default
+        int numberOfColumns = 9;//to make 6 chapter-levels possible, 9 columns are needed
+        double spaceBeforeAtAdditionalLine = 0.0;//in inch (defined in fo-styles.xslt)
+        
+        MutableAttributeSet attsIndentation = getFoConfiguration().getAttributeSet( "toc.hanging.indentation" );
+        if( attsIndentation!=null )
+        {
+        	Object tmp = attsIndentation.getAttribute("indentation");
+        	if( tmp!=null )
+        	{
+        		double indentation = inchFromString( tmp.toString());
+        		if( !Double.isNaN(indentation) && !Double.isInfinite(indentation) && indentation>=0.0d )
+        			spaceBeforeAtAdditionalLine = indentation;
+        	}
+        }
+        
+        DocumentRendererContext context = getRendererContext();
+        if( context!=null )
+        {
+        	Object oMaxDepth = context.get("tocMaxDepthToPrint");
+        	if( oMaxDepth!=null )
+        	{
+        		try {
+        			maxTocLevel = Integer.parseInt(oMaxDepth.toString());
+        		}
+        		catch( NumberFormatException nfe) {
+        			
+        		}
+        	}else
+        	{
+        	//if not defined take definition from pdf.xml
+        		DocumentTOC tmpToc = getDocTOC();
+        		if( tmpToc!=null )
+        		{
+        			int tmpTocLevel = tmpToc.getDepth();
+
+        			if( tmpTocLevel>0 )
+        				maxTocLevel=tmpTocLevel;
+        		}
+        	}
+        }
+
+		if( maxTocLevel == 0 )
+		{
+			writeStartTag( TABLE_ROW_TAG, "keep-with-next", "auto" );
+			skipTableCells(1);
+			writeEndTag( TABLE_ROW_TAG );
+		}
 
         if ( level < 1 || level > maxTocLevel )
         {
             return;
         }
-        
+
         tocStack.push( new NumberedListItem( NUMBERING_DECIMAL ) );
 
-        boolean unNumberedItem = false;
-//        if( level > 1)
-//        	unNumberedItem = false;
-        
         for ( DocumentTOCItem tocItem : tocItems )
         {
-            String ref = getIdName( tocItem.getRef() );
-            
-            writeStartTag( TABLE_ROW_TAG, "keep-with-next", "auto" );
+        	if( tocItem!=null )
+        	{
+	            String ref = getIdName( tocItem.getRef() );
+	            
+	            MutableAttributeSet atts = getFoConfiguration().getAttributeSet( "toc.h" + level + ".style" );
+	            String tocItemName = tocItem.getName();
+	            
+	            String[] tocItemNameSplitted = splitToFit(tocItemName, level, atts, spaceBeforeAtAdditionalLine);
+	            
+	            
+	            for( int i=0; i<tocItemNameSplitted.length; i++ )
+	            {
+	            	if( i==0 )
+	            	{
+	            		writeStartTag( TABLE_ROW_TAG, "keep-with-next", "auto" );
+	            		skipTableCells(level-1);
+	            	}
+	            	else
+	            	{
+	            		writeStartTag( TABLE_ROW_TAG, "keep-with-next", "always" );
+	            		skipTableCells(level);
+	            	}
+		            
+		            
+	            	NumberedListItem current = tocStack.peek();
+	                
+	            	if( current!=null && i==0 )
+	            	{
+		            	writeStartTag( TABLE_CELL_TAG, "toc.cell" );
+		                writeStartTag( BLOCK_TAG, "toc.number.style" );
+		
+		                
+		                current.next();
+		                if( level<5 )
+		                	write( currentTocNumber() );
+		            	
+		            	writeEndTag( BLOCK_TAG );
+		                writeEndTag( TABLE_CELL_TAG );
+	            	}
+		
+	            	int iSpan = numberOfColumns - level -1;
+		            String span = Integer.toString( iSpan );//5
+		            
+		            writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", span, "toc.cell" );
+		            
+		            if( atts!=null )
+		            {
+		            	if( i!=0 )
+		            	{
+		            		atts.addAttribute( "text-align", "left" );
+		            		atts.addAttribute( "text-align-last", "start");
+		            		
+		            		double tmpColWidth = tocColWidthC7-spaceBeforeAtAdditionalLine;
+		            		if( iSpan>1 )tmpColWidth+=tocColWidthC6;
+		            		if( iSpan>2 )tmpColWidth+=tocColWidthC5;
+		            		if( iSpan>3 )tmpColWidth+=tocColWidthC4;
+		            		if( iSpan>4 )tmpColWidth+=tocColWidthC3;
+		            		if( iSpan>5 )tmpColWidth+=tocColWidthC2;
+//	System.out.println("level="+level+"   maxTitleLength="+tmpColWidth+"in");	            		
+		            		writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
+		                    writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+spaceBeforeAtAdditionalLine+"in" );
+		                    writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+tmpColWidth+"in" );
+		                    
+		                    writeStartTag( TABLE_BODY_TAG );
+		                    writeStartTag( TABLE_ROW_TAG, "keep-with-next", "always" );
+		                    skipTableCells(1);
 
-            if ( level > 2 )
-            {
-                for ( int i = 0; i < level - 2; i++ )
-                {
-                    writeStartTag( TABLE_CELL_TAG );
-                    writeSimpleTag( BLOCK_TAG );
-                    writeEndTag( TABLE_CELL_TAG );
-                }
-            }
-            
-            if( !unNumberedItem )
-            {
-            	writeStartTag( TABLE_CELL_TAG, "toc.cell" );
-                writeStartTag( BLOCK_TAG, "toc.number.style" );
+		                    writeStartTag( TABLE_CELL_TAG );
+		            	}else
+		            	{
+		            		atts.addAttribute( "text-align", "justify" );
+		            		atts.addAttribute( "text-align-last", "justify");
+		            	}
+		            		
+		            }else
+		            {
+		            	atts = new SimpleAttributeSet();
+		            	atts.addAttribute( "text-align", "justify" );
+	            		atts.addAttribute( "text-align-last", "justify");
+//		            	System.out.println("atts==null for "+tocItemNameSplitted[i]);
+		            }
+		
+		            writeStartTag( BLOCK_TAG, atts );
+		            writeStartTag( BASIC_LINK_TAG, "internal-destination", ref );
+		            text( tocItemNameSplitted[i] );
+		            writeEndTag( BASIC_LINK_TAG );
+		            if( i==0 )
+		            	writeEmptyTag( LEADER_TAG, "toc.leader.style" );
+	            	
+	            	writeEndTag( BLOCK_TAG );
+	            	
+	            	if( i!=0 )
+	            	{
+	            		writeEndTag( TABLE_CELL_TAG );
+	            		writeEndTag( TABLE_ROW_TAG );
+	            		writeEndTag( TABLE_BODY_TAG );
+	                    writeEndTag( TABLE_TAG );
+	            	}
+	            	
+	            	writeEndTag( TABLE_CELL_TAG );
+	            	writeStartTag( TABLE_CELL_TAG, "text-align", "right" );
+	            	writeStartTag( BLOCK_TAG );
+	            	
+	            	if( i==0 )
+	            	{
+		            	writeStartTag( INLINE_TAG, "page.number" );
+		            	writeEmptyTag( PAGE_NUMBER_CITATION_TAG, "ref-id", ref );
+		            	writeEndTag( INLINE_TAG );
+	            	}
+		            writeEndTag( BLOCK_TAG );
+		            writeEndTag( TABLE_CELL_TAG );
+		            writeEndTag( TABLE_ROW_TAG );
+	            }
+	            
+	            if ( tocItem.getItems() != null )
+	            {
+	                writeTocItems( tocItem.getItems(), level + 1 );
+	            }
 
-                NumberedListItem current = tocStack.peek();
-                
-                current.next();
-            	write( currentTocNumber() );
-            	
-            	writeEndTag( BLOCK_TAG );
-                writeEndTag( TABLE_CELL_TAG );
-
-            }else
-            	setChapter(0);
-
-//            writeEndTag( BLOCK_TAG );
-//            writeEndTag( TABLE_CELL_TAG );
-
-            String span = "3";
-
-            if ( level > 2 )
-            {
-                span = Integer.toString( 5 - level );
-            }
-
-            writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", span, "toc.cell" );
-            MutableAttributeSet atts = getFoConfiguration().getAttributeSet( "toc.h" + level + ".style" );
-            atts.addAttribute( "text-align-last", "justify" );
-
-            writeStartTag( BLOCK_TAG, atts );
-            writeStartTag( BASIC_LINK_TAG, "internal-destination", ref );
-            text( tocItem.getName() );
-            writeEndTag( BASIC_LINK_TAG );
-            if( unNumberedItem )
-            	writeEmptyTag( LEADER_TAG, "" );
-            else
-            {
-            	writeEmptyTag( LEADER_TAG, "toc.leader.style" );
-            	writeStartTag( INLINE_TAG, "page.number" );
-            	writeEmptyTag( PAGE_NUMBER_CITATION_TAG, "ref-id", ref );
-            	writeEndTag( INLINE_TAG );
-            }
-            writeEndTag( BLOCK_TAG );
-            writeEndTag( TABLE_CELL_TAG );
-            writeEndTag( TABLE_ROW_TAG );
-
-            if ( tocItem.getItems() != null )
-            {
-                writeTocItems( tocItem.getItems(), level + 1 );
-            }
-            
-            if( tocItem.getRef().equals("./toc"))
-            	unNumberedItem=false;
+        	}
         }
 
         tocStack.pop();
     }
 
+    /**
+     * Sometimes chapter-titles are to long to fit into a single line in toc. If this is the case, this function splits it up in several strings so it can be printed in several lines. 
+     * @param tocItemName the 
+     * @param level
+     * @param atts
+     * @param spaceBeforeAtAdditionalLine
+     * @return
+     */
+    private String[] splitToFit(String tocItemName, int level, MutableAttributeSet atts, double spaceBeforeAtAdditionalLine)
+    {
+    	String breakmark = "\u01DE";//"<#1#>";
+    	String[] res = new String[] {tocItemName};
+    	double spaceAvailableAtFirstLine = availablePageWidthInInch;
+    	double spaceAvailableAtAdditionalLine = availablePageWidthInInch;
+    	double offsetLine1 = 0.0d;
+    	
+    	switch( level )
+    	{
+	    	case 6:
+	    		offsetLine1 	+= tocColWidthC5;
+	    	case 5:
+	    		offsetLine1 	+= tocColWidthC4;
+	    	case 4:
+	    		offsetLine1 	+= tocColWidthC3;
+	    	case 3:
+	    		offsetLine1 	+= tocColWidthC2;
+	    	case 2:
+	    		offsetLine1 	+= tocColWidthC1;
+	    	case 1:
+	    		break;
+    		default:
+    			break;   				
+    	}
+    	spaceAvailableAtFirstLine -= offsetLine1+tocColWidthC9;
+    	spaceAvailableAtAdditionalLine -= offsetLine1+spaceBeforeAtAdditionalLine+tocColWidthC9;
+//    	System.out.println("level="+level+"  spaceAvailable1stLn="+spaceAvailableAtFirstLine+"   spaceAvailable2ndLn="+spaceAvailableAtAdditionalLine);
+    	if( atts!= null )
+    	{
+    		double fontWidth = this.extractFontHeightInInch(atts, 2)*0.45d;
+    		String words[] = StringUtils.split(tocItemName, " ");
+    		
+    		if( words!=null && words.length>0 )
+    		{
+    			StringBuffer tmp = new StringBuffer();
+    			double availableSpaceInLine = spaceAvailableAtFirstLine;
+    			boolean firstWordInLine = true;
+    			
+    			for( String word : words )
+    			{
+    				if( word!=null )
+    				{
+    					int letters = word.length();
+    					if( !firstWordInLine )
+    						letters++;
+    					double wordLengthInInch = letters*fontWidth;
+    					if(level>=4)
+//    						System.out.println(word+" -> wordlength="+wordLengthInInch+"   available="+availableSpaceInLine);
+    					if( wordLengthInInch>availableSpaceInLine )
+    					{
+    						tmp.append(breakmark).append(" ");
+    						availableSpaceInLine = spaceAvailableAtAdditionalLine;
+    						firstWordInLine = true;
+    					}	
+    						
+						if( !firstWordInLine )
+							tmp.append(" ");
+						else
+						{
+							firstWordInLine = false;
+						}
+						tmp.append(word);
+						availableSpaceInLine -= wordLengthInInch;
+    					
+    				}
+    			}
+    			res = StringUtils.split( tmp.toString(), breakmark );
+    			for( int i=0 ; i<res.length; i++ )
+    				if( res[i]!=null)
+    					res[i] = res[i].trim();
+    		}
+    	}
+    	
+    	
+    	return res;
+    }
+    
+    /**
+     * Skips the number of cells in the current table
+     * @param numberOfCellsToSkip the number of table-cells to be skipped
+     */
+    private void skipTableCells(int numberOfCellsToSkip)
+    {
+    	for( int i=0; i<numberOfCellsToSkip; i++ )
+    	{
+	    	writeStartTag( TABLE_CELL_TAG );
+	        writeSimpleTag( BLOCK_TAG );
+	        writeEndTag( TABLE_CELL_TAG );
+    	}
+    }
+    
     private String currentTocNumber()
     {
         StringBuilder ch = new StringBuilder( tocStack.get( 0 ).getListItemSymbol() );
 
         for ( int i = 1; i < tocStack.size(); i++ )
         {
-            ch.append( "." + tocStack.get( i ).getListItemSymbol() );
+            ch.append( tocStack.get( i ).getListItemSymbol() );
         }
 
         return ch.toString();
@@ -1333,7 +1663,7 @@ public class FoAggregateSink
     }
     
     /**
-     * Writes the executive summary, if it exists and is defined as first item in TOC
+     * Writes the executive summery, if it exists and is defined as first item in TOC
      * @Parameter exsumName the (localized) title of the executive summary
      */
     public void execSum(DocumentModel model, String exsumName)
@@ -1371,6 +1701,7 @@ public class FoAggregateSink
     public void closeExecSum()
     {
         writeEndTag( PAGE_SEQUENCE_TAG );
+        writeEOL();writeEOL();
     }
     
     /**
@@ -1392,7 +1723,7 @@ public class FoAggregateSink
         }
 
         String pageSize = "USLetter";
-        String titleHeader = "";
+        String classification = "";
         if( meta!=null )
         {
         	pageSize = meta.getPageSize();
@@ -1402,9 +1733,9 @@ public class FoAggregateSink
     	DocumentRendererContext drContext = getRendererContext();
     	if( drContext!=null)
     	{
-    		Object tmp = drContext.get("titleHeader");
+    		Object tmp = drContext.get("classification");
     		if( tmp!=null )
-    			titleHeader = tmp.toString();
+    			classification = tmp.toString();
         }
     	
         MutableAttributeSet attBase = getFoConfiguration().getAttributeSet( "layout.master.set.base" );
@@ -1458,22 +1789,25 @@ public class FoAggregateSink
         
         double availableWidthInInch = paperWidthInInch-marginLeftInInch-marginRightInInch;
         double availableHeightInInch= paperHeightInInch-marginTopInInch-marginBottomInInch;
-        
-        writeln( "<fo:page-sequence master-reference=\"cover-page\">");// initial-page-number=\"1\" format=\"i\">" );
-        writeCoverHead(cover, availableWidthInInch, titleHeader);
-        writeCoverFooter(titleHeader);
+        availablePageWidthInInch = availableWidthInInch;
+            	
+            	
+        writeln( "<fo:page-sequence master-reference=\"cover-page\">");
+        writeCoverHead(cover, availableWidthInInch, classification);
+        writeCoverFooter(classification);
         writeCoverBody(cover, availableWidthInInch, availableHeightInInch, meta);
         
         writeEndTag( PAGE_SEQUENCE_TAG );
+        writeEOL();writeEOL();
     }
     
     /**
      * Writes the header to the cover-page. DocumentCover has to be defined for this work.
      * @param cover the DocumentCover
      * @param availableWidth the available width (overall width - margins (left and right))
-     * @param titleHeader the titleHeader string that shall be written to the header
+     * @param classification the classificationstring that shall be written to the header (e.g. "UNCLASSIFIED")
      */
-    private void writeCoverHead( DocumentCover cover, double availableWidth, String titleHeader)
+    private void writeCoverHead( DocumentCover cover, double availableWidth, String classification)
     {
     	if ( cover == null )
         {
@@ -1488,25 +1822,25 @@ public class FoAggregateSink
         writeStartTag( STATIC_CONTENT_TAG, "flow-name", "xsl-region-before" );
         writeStartTag( BLOCK_TAG, "text-align", "center" );
         writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");//"2.1666in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");//"2.1666in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");//"2.1666in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");//"2.1666in" );
-        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");//"2.1666in" );
-        writeStartTag( TABLE_BODY_TAG );//, "" );
-        writeStartTag( TABLE_ROW_TAG );//, "" );
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");
+        writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+columnWidth5Cols+"in");
+        writeStartTag( TABLE_BODY_TAG );
+        writeStartTag( TABLE_ROW_TAG );
         
-        //titleHeader
+        //classification
         writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "5");
-        writeStartTag( BLOCK_TAG, "cover.header");//"header.style");
-        writeln( titleHeader );//.toUpperCase() );
+        writeStartTag( BLOCK_TAG, "cover.classification");
+        writeln( classification );
         writeEndTag( BLOCK_TAG );
         writeEndTag( TABLE_CELL_TAG );
         writeEndTag( TABLE_ROW_TAG );
         
-        //spacing between titleHeader and company-logo
+        //spacing between classification and company-logo
         writeStartTag( TABLE_ROW_TAG );
-        writeStartTag( TABLE_CELL_TAG, "height", "0.3in" );//, "number-columns-spanned", "3");
+        writeStartTag( TABLE_CELL_TAG, "height", "0.3in" );
         writeSimpleTag( BLOCK_TAG );
         writeEndTag( TABLE_CELL_TAG );
         writeEndTag( TABLE_ROW_TAG );
@@ -1635,18 +1969,27 @@ public class FoAggregateSink
             projLogoHeight = calculateImageHeight(atts);
         }
         
-        MutableAttributeSet attTitle = getFoConfiguration().getAttributeSet( "cover.title" );
-        MutableAttributeSet attSubtitle = getFoConfiguration().getAttributeSet( "cover.subtitle" );
-        MutableAttributeSet attDate = getFoConfiguration().getAttributeSet( "cover.date" );
-        MutableAttributeSet attPOC = getFoConfiguration().getAttributeSet( "cover.poc" );
-        MutableAttributeSet attDistStat = getFoConfiguration().getAttributeSet( "cover.distributionstatement" );
-        titleHeight = extractFontHeightInInch(attTitle, 2);
-        subtitleHeight = extractFontHeightInInch(attSubtitle, 2);
-        typeHeight = extractFontHeightInInch(attSubtitle, 2);
-        dateHeight = extractFontHeightInInch(attDate, 2);
-        pocHeight = extractFontHeightInInch(attPOC, 2);
-        distStateHeight = extractFontHeightInInch(attDistStat, 2);
+        FoConfiguration foConf = getFoConfiguration();
+        MutableAttributeSet attTitle = null;
+        MutableAttributeSet attSubtitle = null;
+        MutableAttributeSet attDate = null;
+        MutableAttributeSet attPOC = null;
+        MutableAttributeSet attDistStat = null;
         
+        if( foConf!=null )
+        {
+	        attTitle = foConf.getAttributeSet( "cover.title" );
+	        attSubtitle = foConf.getAttributeSet( "cover.subtitle" );
+	        attDate = foConf.getAttributeSet( "cover.date" );
+	        attPOC = foConf.getAttributeSet( "cover.poc" );
+	        attDistStat = foConf.getAttributeSet( "cover.distributionstatement" );
+	        titleHeight = extractFontHeightInInch(attTitle, 2);
+	        subtitleHeight = extractFontHeightInInch(attSubtitle, 2);
+	        typeHeight = extractFontHeightInInch(attSubtitle, 2);
+	        dateHeight = extractFontHeightInInch(attDate, 2);
+	        pocHeight = extractFontHeightInInch(attPOC, 2);
+	        distStateHeight = extractFontHeightInInch(attDistStat, 2);
+        }
         
         
         //initial spacings in inch, to be (partly) scaled to fit the page
@@ -1789,7 +2132,7 @@ public class FoAggregateSink
         
         //spacing between project-logo and title
         writeStartTag( TABLE_ROW_TAG );
-        writeStartTag( TABLE_CELL_TAG, "height", ""+spcPLogoTitle+"in");//"0.5in" );
+        writeStartTag( TABLE_CELL_TAG, "height", ""+spcPLogoTitle+"in");
         writeSimpleTag( BLOCK_TAG );
         writeEndTag( TABLE_CELL_TAG );
         writeEndTag( TABLE_ROW_TAG );
@@ -1935,14 +2278,23 @@ public class FoAggregateSink
     			String strFtSize = oFtSize.toString();
     			if( strFtSize.endsWith("pt") )
     			{
-    				int pxHeight = Integer.parseInt(strFtSize.substring(0, strFtSize.length()-2));
+    				try
+    				{
+    					
+	    				double pxHeight = Double.parseDouble(strFtSize.substring(0, strFtSize.length()-2));
 
-    				if( spacing>0 )
-    					pxHeight+=spacing;
-    				if( pxHeight>0 )
-    					res = pxHeight/72.0d; //72 dotsPerInch
+	    				if( spacing>0 )
+	    					pxHeight+=spacing;
+	    				if( pxHeight>0 )
+	    					res = pxHeight/72.0d; //72 dotsPerInch
+    				}catch(NumberFormatException nfe)
+    				{
+    					res = spacing/72.0d;
+    				}
     			}
     		}
+//    		if( res>0.7d )
+//    			System.out.println("MutableAttributeSet= "+mas.toString());
     	}
     	
     	return res;
@@ -1960,9 +2312,9 @@ public class FoAggregateSink
     	
     	if( seas!=null )
     	{
-    		Object strPxWidth = seas.getAttribute("width");//.toString();
-    		Object strPxHeight= seas.getAttribute("height");//.toString();
-    		Object strContWidth = seas.getAttribute("content-width");//.toString();
+    		Object strPxWidth = seas.getAttribute("width");
+    		Object strPxHeight= seas.getAttribute("height");
+    		Object strContWidth = seas.getAttribute("content-width");
     		if( strPxWidth!=null && strPxHeight!=null && strContWidth!=null )
     		{
     			int pxWidth = Integer.parseInt(strPxWidth.toString());
@@ -1997,16 +2349,16 @@ public class FoAggregateSink
     
     /**
      * Writes the footer to the cover-page.
-     * @param titleHeader the titleHeader that is to be written to the cover-pages footer
+     * @param classification the classification that is to be written to the cover-pages footer
      */
-    private void writeCoverFooter( String titleHeader )
+    private void writeCoverFooter( String classification )
     {
     	writeStartTag( STATIC_CONTENT_TAG, "flow-name", "xsl-region-after" );
-        writeStartTag( BLOCK_TAG, "cover.header");
+        writeStartTag( BLOCK_TAG, "cover.classification");
        
-        if ( titleHeader != null )
+        if ( classification != null )
         {
-            write( titleHeader );//.toUpperCase() );
+            write( classification );
         }
         writeEndTag( BLOCK_TAG );
         writeEndTag( STATIC_CONTENT_TAG );
@@ -2047,6 +2399,10 @@ public class FoAggregateSink
         return new SinkEventAttributeSet( atts );
     }
 
+    /**
+     * (De-)Activates the mode of writing pages between document-cover and table of contents. (needed to write the executive summary)
+     * @param skip
+     */
     public void activatePriorPageWriting(boolean skip)
     {
     	writingPriorPage = skip;

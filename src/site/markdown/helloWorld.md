@@ -1,6 +1,7 @@
 # This is a markdown file
 
-First a simple list
+First a simple list that is over 9 items. The original maven pdf plugin has formatting issues for lists greater than 9.
+This forces the issue and hopefully, displays in a reasonable manner.
 
 1. one
 2. two

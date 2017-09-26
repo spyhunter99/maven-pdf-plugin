@@ -32,7 +32,7 @@ Known Bugs and Limitations
 
 * Missing Features
 
-  * Menu sub-items are not supported in TOC (every source document starts a new chapter).
+  * Menu sub-items are not supported in TOC (every source document starts a new chapter) - FIXED in this Fork!.
 
   []
 

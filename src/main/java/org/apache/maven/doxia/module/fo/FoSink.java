@@ -36,6 +36,8 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML.Attribute;
 import javax.swing.text.html.HTML.Tag;
 
+import org.apache.maven.doxia.document.DocumentTOC;
+import org.apache.maven.doxia.document.DocumentTOCItem;
 import org.apache.maven.doxia.sink.SinkEventAttributes;
 import org.apache.maven.doxia.sink.impl.AbstractXmlSink;
 import org.apache.maven.doxia.sink.impl.SinkEventAttributeSet;
@@ -80,7 +82,17 @@ public class FoSink
 
     /** Counts the current subsubsection level. */
     private int subsubsection = 0;
-
+    
+    /** Counts the current subsubsubsection level. */
+    private int sub3section = 0;
+    
+    /** Counts the current subsubsubsubsection level. */
+    private int sub4section = 0;
+    
+    /** Counts the current subsubsubsubsection level. */
+    private int sub5section = 0;
+    
+    
     /** Verbatim flag. */
     private boolean verbatim;
 
@@ -117,6 +129,15 @@ public class FoSink
      * Using to reduce warn messages. */
     protected Map<String, Set<String>> warnMessages;
 
+    private DocumentTOC docTOC=null;
+    private DocumentTOCItem lastTOCItem= null;
+    private java.util.Vector<DocumentTOCItem>[] tocItemsPerLvl=null;
+    int[] tocItemsListsCounters = null;
+//    //for testing
+//    int refIDCtr = 0;
+//    boolean sectionTitleActive = false;
+    
+    
     /**
      * Constructor, initialize the Writer.
      *
@@ -322,10 +343,27 @@ public class FoSink
         {
             subsection++;
             subsubsection = 0;
+            sub3section=0;
         }
         else if ( level == SECTION_LEVEL_3 )
         {
-            subsubsection++;
+        	subsubsection++;
+        	sub3section=0;
+        	sub4section = 0;
+        }
+        else if ( level == SECTION_LEVEL_4 )
+        {
+            sub3section++;
+            sub4section = 0;
+        }
+        else if ( level == SECTION_LEVEL_5 )
+        {
+            sub4section++;
+            sub5section = 0;
+        }
+        else if ( level == SECTION_LEVEL_6 )
+        {
+            sub5section++;
         }
 
         onSection();
@@ -376,24 +414,28 @@ public class FoSink
     /** {@inheritDoc} */
     public void section2()
     {
+//    	sectionTitleActive=true;
         section( SECTION_LEVEL_2, null );
     }
 
     /** {@inheritDoc} */
     public void sectionTitle2()
     {
+//    	sectionTitleActive=true;
         sectionTitle( SECTION_LEVEL_2, null );
     }
 
     /** {@inheritDoc} */
     public void sectionTitle2_()
     {
+//    	sectionTitleActive = false;
         sectionTitle_( SECTION_LEVEL_2 );
     }
 
     /** {@inheritDoc} */
     public void section2_()
     {
+//    	sectionTitleActive=false;
         section_( SECTION_LEVEL_2 );
     }
 
@@ -468,12 +510,39 @@ public class FoSink
     {
         section_( SECTION_LEVEL_5 );
     }
+    
+    /** {@inheritDoc} */
+    public void section6()
+    {
+        section( SECTION_LEVEL_6, null );
+    }
+
+    /** {@inheritDoc} */
+    public void sectionTitle6()
+    {
+        sectionTitle( SECTION_LEVEL_6, null );
+    }
+
+    /** {@inheritDoc} */
+    public void sectionTitle6_()
+    {
+        sectionTitle_( SECTION_LEVEL_6 );
+    }
+
+    /** {@inheritDoc} */
+    public void section6_()
+    {
+        section_( SECTION_LEVEL_6 );
+    }
 
     /** Starts a section/subsection. */
     private void onSection()
     {
         writeEOL();
+        
         writeStartTag( BLOCK_TAG, "body.text" );
+        
+        
     }
 
     /**
@@ -482,6 +551,167 @@ public class FoSink
      * @param depth The section level.
      */
     private void onSectionTitle( int depth )
+    {
+        StringBuilder title = new StringBuilder( 16 );
+
+        title.append( getChapterString() );
+        String ref =null;
+        
+        writeEOL();
+        if ( depth == SECTION_LEVEL_1 )
+        {
+        	ref = getNextTitleReference(1);
+        	if( ref!=null )
+        		writeStartTag( BLOCK_TAG,"id", ref, "body.h1" );
+        	else
+        		writeStartTag( BLOCK_TAG, "body.h1" );
+            title.append( section ).append( "   " );
+        }
+        else if ( depth == SECTION_LEVEL_2 )
+        {
+        	
+        	ref = getNextTitleReference(2);
+        	if( ref!=null )
+        	{
+        		writeStartTag( BLOCK_TAG,"id",ref,"body.h2" );
+        	}else
+        		writeStartTag( BLOCK_TAG,"body.h2" );
+            title.append( section ).append( "." );
+            title.append( subsection ).append( "   " );
+        }
+        else if ( depth == SECTION_LEVEL_3 )
+        {
+        	ref = getNextTitleReference(3);
+        	if( ref!=null )
+        		writeStartTag( BLOCK_TAG,"id", ref, "body.h3" );
+        	else
+        		writeStartTag( BLOCK_TAG, "body.h3" );
+            title.append( section ).append( "." );
+            title.append( subsection ).append( "." );
+            title.append( subsubsection ).append( "   " );
+        }
+        else if ( depth == SECTION_LEVEL_4 )
+        {
+        	ref = getNextTitleReference(4);
+        	if( ref!=null )
+        		writeStartTag( BLOCK_TAG,"id", ref, "body.h4" );
+        	else
+        		writeStartTag( BLOCK_TAG, "body.h4" );
+        	title.delete(0, title.length());
+//        	title.append( section ).append( "." );
+//            title.append( subsection ).append( "." );
+//            title.append( subsubsection ).append( "." );
+//            title.append( sub3section ).append( "   " );
+        }
+        else if ( depth == SECTION_LEVEL_5 )
+        {
+        	ref = getNextTitleReference(5);
+        	if( ref!=null )
+        		writeStartTag( BLOCK_TAG,"id", ref, "body.h5" );
+        	else
+        		writeStartTag( BLOCK_TAG, "body.h5" );
+        	title.delete(0, title.length());
+//        	title.append( section ).append( "." );
+//            title.append( subsection ).append( "." );
+//            title.append( subsubsection ).append( "." );
+//            title.append( sub3section ).append( "." );
+//            title.append( sub4section ).append( "   " );
+        }
+        else if ( depth == SECTION_LEVEL_6 )
+        {
+        	ref = getNextTitleReference(6);
+        	if( ref!=null )
+        		writeStartTag( BLOCK_TAG,"id", ref, "body.h6" );
+        	else
+        		writeStartTag( BLOCK_TAG, "body.h6" );
+        	
+        	title.delete(0, title.length());
+//        	title.append( section ).append( "." );
+//            title.append( subsection ).append( "." );
+//            title.append( subsubsection ).append( "." );
+//            title.append( sub3section ).append( "." );
+//            title.append( sub4section ).append( "." );
+//            title.append( sub5section ).append( "   " );
+        }
+//System.out.println("FoSink.onSectionTitle()- title= "+title);
+        write( title.toString() );
+    }
+    
+    private String getNextTitleReference(int sectionLevel) {
+		String res = null;
+
+		int offset = 0;
+		int localLvl = sectionLevel+offset;
+
+		if( docTOC!=null && localLvl>=0 && localLvl < tocItemsPerLvl.length )
+		{
+			java.util.Vector<DocumentTOCItem> relevantItems = tocItemsPerLvl[localLvl];
+			int itemIndex = tocItemsListsCounters[localLvl]++;
+			if( relevantItems!=null && relevantItems.size()>itemIndex )
+			{
+				DocumentTOCItem tmp = relevantItems.elementAt(itemIndex);
+				if( tmp!=null )
+					res = tmp.getRef();
+			}
+		}
+		
+		return res;
+	}
+
+    protected DocumentTOC getDocTOC() {
+		return docTOC;
+	}
+
+	protected void setDocTOC(DocumentTOC docTOC) {
+		this.docTOC = docTOC;
+		tocItemsPerLvl=(java.util.Vector<DocumentTOCItem>[]) new java.util.Vector[6];
+		tocItemsListsCounters = new int[tocItemsPerLvl.length];
+        
+		for( int i=0; i<tocItemsPerLvl.length; i++ )
+		{
+			tocItemsPerLvl[i] = new java.util.Vector<DocumentTOCItem>();
+			tocItemsListsCounters[i]=0;
+		}
+        
+        
+        if( docTOC!=null )
+        {
+        	java.util.List<DocumentTOCItem> items = docTOC.getItems();
+        	int lvl=0;
+        	for( DocumentTOCItem ti : items )
+        	{
+        		copyTOCItemIntoLists(ti, lvl);
+        	}
+        	
+//        	for( int i=0 ; i<tocItemsPerLvl.length ; i++  )
+//        	{
+//        		java.util.Vector<DocumentTOCItem> references = tocItemsPerLvl[i];
+//        		System.out.println("["+i+"] vectorsize: "+references.size());
+//        	}
+        }
+        
+	}
+	
+	private void copyTOCItemIntoLists(DocumentTOCItem ti, int lvl)
+	{
+		int levelOffset = 0;
+		int localLevel = lvl+levelOffset;
+		
+		if( ti!=null && localLevel>=0 && localLevel<tocItemsPerLvl.length )
+		{
+			tocItemsPerLvl[localLevel].addElement(ti);
+			java.util.List<DocumentTOCItem> children = ti.getItems();
+			if( children!=null )
+			{
+				for( DocumentTOCItem tiC : children )
+				{
+					copyTOCItemIntoLists(tiC, localLevel+1);
+				}
+			}
+		}
+	}
+	
+	private void onSectionTitleOrig( int depth )
     {
         StringBuilder title = new StringBuilder( 16 );
 
@@ -1828,5 +2058,7 @@ public class FoSink
         this.verbatim = false;
         this.inFigure = false;
         this.warnMessages = null;
+        
     }
+
 }

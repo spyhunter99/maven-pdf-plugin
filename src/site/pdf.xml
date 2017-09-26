@@ -23,7 +23,7 @@ under the License.
 <document xmlns="http://maven.apache.org/DOCUMENT/1.0.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/DOCUMENT/1.0.1 
-  http://maven.apache.org/xsd/document-1.0.1.xsd"
+      http://maven.apache.org/xsd/document-1.0.1.xsd"
   outputName="maven-pdf-plugin">
 
   <meta>
@@ -32,6 +32,7 @@ under the License.
   </meta>
   
   <toc name="Table of Contents">
+  	<item name="Executive Summary" ref="exsum.md"/>
     <item name="Introduction" ref="index.apt.vm"/>
     <item name="Usage" ref="usage.apt.vm"/>
     <item name="Filtering Document Descriptor" ref="examples/filtering.apt"/>
@@ -44,9 +45,11 @@ under the License.
     <coverTitle>${project.name}</coverTitle>
     <coverSubTitle>v. ${project.version}</coverSubTitle>
     <coverType>User Guide</coverType>
-    <projectLogo>images/test_2175x775.jpg</projectLogo>
+    <projectName>${project.name}</projectName>
+    <projectLogo>images\test_2175x775.jpg</projectLogo>
     <companyName>The Apache Software Foundation</companyName>
     <companyLogo>http://www.apache.org/images/asf_logo_wide.png</companyLogo>
+    <author>First Last, mail@adress, 443-000-0000</author>
   </cover>
 </document>
 <!-- END SNIPPET: docDescriptor -->

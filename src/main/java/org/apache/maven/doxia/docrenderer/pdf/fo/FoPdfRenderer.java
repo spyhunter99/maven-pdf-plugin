@@ -36,6 +36,7 @@ import org.apache.maven.doxia.docrenderer.pdf.PdfRenderer;
 import org.apache.maven.doxia.document.DocumentModel;
 import org.apache.maven.doxia.document.DocumentTOC;
 import org.apache.maven.doxia.document.DocumentTOCItem;
+import org.apache.maven.doxia.module.fo.DocumentStructureExtractionSink;
 import org.apache.maven.doxia.module.fo.FoAggregateSink;
 import org.apache.maven.doxia.module.fo.FoSink;
 import org.apache.maven.doxia.module.fo.FoSinkFactory;
@@ -151,6 +152,7 @@ public class FoPdfRenderer
             DocumentTOCItem tocItemExsum = null;
             boolean exsum=false;
             
+            scanDocumentsForTOCItems(documentModel, context);
             DocumentTOC toc = documentModel.getToc();
             java.util.Vector<DocumentTOCItem> newList = new java.util.Vector<DocumentTOCItem>();
             
@@ -262,6 +264,38 @@ public class FoPdfRenderer
         generatePdf( outputFOFile, pdfOutputFile, documentModel );
     }
 
+    /**
+     * Scans the source-documents for their inner structure to identify (sub-)chapters in order to complete the table of contents. 
+     * @param dModel the DoumentModel, not null
+     * @param context the renderer-context
+     */
+    private void scanDocumentsForTOCItems(DocumentModel dModel, DocumentRendererContext context)
+    {
+    	if( dModel!=null )
+    	{
+	    	DocumentTOC toc = dModel.getToc();
+	    	if( toc!=null )
+	    	{
+	    		DocumentStructureExtractionSink dsSink = new DocumentStructureExtractionSink(new DummyWriter());
+
+	    		for( DocumentTOCItem tocItem: toc.getItems() )
+	    		{
+		    		try {
+		    			parseTOCItem( tocItem, dsSink, context );
+						dsSink.enrichTOCItemWithSubstructure(tocItem);
+						dsSink.reset();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (DocumentRendererException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	    		}
+	    	}
+    	}
+    }
+    
     /** {@inheritDoc} */
     @Override
     public void renderIndividual( Map<String, ParserModule> filesToProcess, File outputDirectory )
@@ -340,44 +374,63 @@ public class FoPdfRenderer
     private void parseTocItems( List<DocumentTOCItem> items, FoAggregateSink sink, DocumentRendererContext context )
         throws IOException, DocumentRendererException
     {
-        for ( DocumentTOCItem tocItem : items )
+        for( DocumentTOCItem tocItem : items )
         {
-            if ( tocItem.getRef() == null )
-            {
-                if ( getLogger().isInfoEnabled() )
-                {
-                    getLogger().info( "No ref defined for tocItem " + tocItem.getName() );
-                }
-
-                continue;
-            }
-            
-            String exsumName = null;
-            if( context!=null )
-            {
-            		Object tmp = context.get("executiveSummaryName");
-            	
-            		if( tmp!=null ) exsumName = tmp.toString();//sink.getPomProperty("pdf.executivesummaryname");
-            }
-
-            if( !tocItem.getName().trim().equalsIgnoreCase(exsumName) )
-            {
-	            String href = StringUtils.replace( tocItem.getRef(), "\\", "/" );
-	            if ( href.lastIndexOf( '.' ) != -1 )
-	            {
-	                href = href.substring( 0, href.lastIndexOf( '.' ) );
-	            }
-	
-	            renderModules( href, sink, tocItem, context );
-	
-	            if ( tocItem.getItems() != null )
-	            {
-	                parseTocItems( tocItem.getItems(), sink, context );
-	            }
-            }
+        	if( tocItem!=null )
+        	{
+        		parseTOCItem(tocItem, sink, context);
+        	}
         }
     }
 
+    private void parseTOCItem(DocumentTOCItem tocItem, FoAggregateSink sink, DocumentRendererContext context ) throws IOException, DocumentRendererException
+    {
+    	if( tocItem!=null && sink!=null && context !=null )
+    	{
+    		if( tocItem!=null )
+        	{
+	            if ( tocItem.getRef() == null )
+	            {
+	                if ( getLogger().isInfoEnabled() )
+	                {
+	                    getLogger().info( "No ref defined for tocItem " + tocItem.getName() );
+	                }
+	
+	                return;
+	            }
+	            
+	            String exsumName = null;
+	            if( context!=null )
+	            {
+	            		Object tmp = context.get("executiveSummaryName");
+	            	
+	            		if( tmp!=null ) exsumName = tmp.toString();
+	            }
+	
+                    if (tocItem.getName()==null) {
+                        throw new DocumentRendererException("Unable to obtain a ToC item text from the document at " + 
+                                tocItem.getRef() + ". This could be because of a type "
+                                        + "in the pdf.xml descriptor, missing the 'name' attribute?");
+                    }
+	            if( (exsumName!=null && tocItem.getName()!=null && !tocItem.getName().trim().equalsIgnoreCase(exsumName)) || exsumName==null )
+	            {
+		            String href = StringUtils.replace( tocItem.getRef(), "\\", "/" );
+		            if ( href.lastIndexOf( '.' ) != -1 )
+		            {
+		                href = href.substring( 0, href.lastIndexOf( '.' ) );
+		            }
+		
+		            renderModules( href, sink, tocItem, context );
+		
+		            if ( tocItem.getItems() != null )
+		            {
+		                parseTocItems( tocItem.getItems(), sink, context );
+		            }
+	            }
+        	}
+    	}
+    }
+    
     private void renderModules( String href, FoAggregateSink sink, DocumentTOCItem tocItem,
                                 DocumentRendererContext context )
         throws DocumentRendererException, IOException
@@ -407,12 +460,12 @@ public class FoPdfRenderer
                         }
                         source = new File( moduleBasedir, doc );
                     }
-    
+
                     if ( source.exists() )
                     {
                     	sink.setDocumentName( doc );
                         sink.setDocumentTitle( tocItem.getName() );
-    
+
                         parse( source.getPath(), module.getParserId(), sink, context );
                     }
                 }
@@ -456,4 +509,31 @@ public class FoPdfRenderer
             throw new DocumentRendererException( "Error creating PDF from " + inputFile + ": " + e.getMessage() );
         }
     }
+    
+    /**
+     * Neccessary to make parsing to DocumentStructureExtractionSink (in order to extract the TOC-Items from the documents) 
+     * possible without harming existing outputs 
+     */
+    private class DummyWriter extends java.io.Writer
+	{
+
+		@Override
+		public void write(char[] cbuf, int off, int len) throws IOException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void flush() throws IOException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void close() throws IOException {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}
 }
