@@ -5,6 +5,7 @@ Primary deltas
  - Allows for custom headers and footers
  - Headers/footers are centered on page
  - Seperate headers on the title pages
+ - Adjustable, Multi-level Table of Contents (generated from your docs)
  - EXSUM, rendered before the TOC
  - Project logo is front and centered and is stretched to full width if possible
  - Title page has several new fields that can be populated
@@ -63,6 +64,9 @@ ASF 2.0 licensed
 						
 					<!-- optional, the cover page can have a pom defined date too -->
 					<pdfCoverDate>1970-1-1</pdfCoverDate>
+					
+					<!-- optional, the max depth of the TOC -->
+					<tocMaxDepthToPrint>4</tocMaxDepthToPrint>
 				  </configuration>
 				</execution>
 			  

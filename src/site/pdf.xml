@@ -30,7 +30,7 @@ under the License.
     <title>Maven PDF Plugin</title>
     <author>The Apache Maven Project</author>
   </meta>
-  
+  <!-- depth of the TOC can be controlled by adding a depth attribute-->
   <toc name="Table of Contents">
   	<item name="Executive Summary" ref="exsum.md"/>
     <item name="Introduction" ref="index.apt.vm"/>
