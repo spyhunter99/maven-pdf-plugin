@@ -24,7 +24,7 @@ under the License.
   
     <groupId>com.github.spyhunter99</groupId>
     <artifactId>maven-pdf-plugin</artifactId>
-    <version>1.5.0.5-SNAPSHOT</version>
+    <version>1.5.0.5</version>
     <packaging>maven-plugin</packaging>
 
     <name>Apache Maven PDF Plugin Fork</name>
@@ -70,7 +70,7 @@ under the License.
         <connection>scm:git:https://github.com/spyhunter99/maven-pdf-plugin.git</connection>
         <developerConnection>scm:git:https://github.com/spyhunter99/maven-pdf-plugin.git</developerConnection>
         <url>https://github.com/spyhunter99/maven-pdf-plugin.git</url>
-        <tag>HEAD</tag>
+        <tag>MPDF-1.5.0.5</tag>
     </scm>
   
     <issueManagement>
