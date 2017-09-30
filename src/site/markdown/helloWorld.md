@@ -60,3 +60,15 @@ Here an ordered list
 1. two this is a super long list item this is a super long list item this is a super long list item this is a super long list item this is a super long list item this is a super long list item this is a super long list item this is a super long list item this is a super long list item this is a super long list item this is a super long list item this is a super long list item
 1. this is a multi line test
    with some more content here
+   
+## H2 This section is a test for having super long section headers, why such a long header is required, no idea but this is here to test this
+
+text
+
+### H3 This section is a test for having super long section headers, why such a long header is required, no idea but this is here to test this
+
+text
+
+#### H4 This section is a test for having super long section headers, why such a long header is required, no idea but this is here to test this
+
+test

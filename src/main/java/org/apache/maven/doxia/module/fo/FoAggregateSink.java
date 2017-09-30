@@ -313,11 +313,6 @@ public class FoAggregateSink
 
     }
     
-//    public void setContext( Object context ) 
-//    {
-//        this.context = context;
-//    }
-
     /**
      * {@inheritDoc}
      */
@@ -1288,11 +1283,9 @@ public class FoAggregateSink
     		for( String tmp : usedReferences )
     			if( tmp!=null && tmp.equals(res) )
     				invalidReference = true;
-//    		System.out.println("invalid reference: "+reference);
     		
     		while(invalidReference)
     		{
-//    			System.out.println("invalid reference: "+reference);
     			res = res+"_";
     			invalidReference = false;
     			for( String tmp : usedReferences )
@@ -1422,7 +1415,7 @@ public class FoAggregateSink
 		            		if( iSpan>3 )tmpColWidth+=tocColWidthC4;
 		            		if( iSpan>4 )tmpColWidth+=tocColWidthC3;
 		            		if( iSpan>5 )tmpColWidth+=tocColWidthC2;
-//	System.out.println("level="+level+"   maxTitleLength="+tmpColWidth+"in");	            		
+
 		            		writeln( "<fo:table table-layout=\"fixed\" width=\"100%\" >" );
 		                    writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+spaceBeforeAtAdditionalLine+"in" );
 		                    writeEmptyTag( TABLE_COLUMN_TAG, "column-width", ""+tmpColWidth+"in" );
@@ -1443,7 +1436,6 @@ public class FoAggregateSink
 		            	atts = new SimpleAttributeSet();
 		            	atts.addAttribute( "text-align", "justify" );
 	            		atts.addAttribute( "text-align-last", "justify");
-//		            	System.out.println("atts==null for "+tocItemNameSplitted[i]);
 		            }
 		
 		            writeStartTag( BLOCK_TAG, atts );
@@ -1524,7 +1516,7 @@ public class FoAggregateSink
     	}
     	spaceAvailableAtFirstLine -= offsetLine1+tocColWidthC9;
     	spaceAvailableAtAdditionalLine -= offsetLine1+spaceBeforeAtAdditionalLine+tocColWidthC9;
-//    	System.out.println("level="+level+"  spaceAvailable1stLn="+spaceAvailableAtFirstLine+"   spaceAvailable2ndLn="+spaceAvailableAtAdditionalLine);
+    	
     	if( atts!= null )
     	{
     		double fontWidth = this.extractFontHeightInInch(atts, 2)*0.45d;
@@ -1544,8 +1536,7 @@ public class FoAggregateSink
     					if( !firstWordInLine )
     						letters++;
     					double wordLengthInInch = letters*fontWidth;
-    					if(level>=4)
-//    						System.out.println(word+" -> wordlength="+wordLengthInInch+"   available="+availableSpaceInLine);
+
     					if( wordLengthInInch>availableSpaceInLine )
     					{
     						tmp.append(breakmark).append(" ");
@@ -1568,6 +1559,7 @@ public class FoAggregateSink
     			for( int i=0 ; i<res.length; i++ )
     				if( res[i]!=null)
     					res[i] = res[i].trim();
+    			
     		}
     	}
     	
@@ -2293,8 +2285,6 @@ public class FoAggregateSink
     				}
     			}
     		}
-//    		if( res>0.7d )
-//    			System.out.println("MutableAttributeSet= "+mas.toString());
     	}
     	
     	return res;

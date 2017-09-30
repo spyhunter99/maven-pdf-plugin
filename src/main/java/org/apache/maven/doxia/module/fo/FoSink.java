@@ -133,9 +133,6 @@ public class FoSink
     private DocumentTOCItem lastTOCItem= null;
     private java.util.Vector<DocumentTOCItem>[] tocItemsPerLvl=null;
     int[] tocItemsListsCounters = null;
-//    //for testing
-//    int refIDCtr = 0;
-//    boolean sectionTitleActive = false;
     
     
     /**
@@ -414,28 +411,24 @@ public class FoSink
     /** {@inheritDoc} */
     public void section2()
     {
-//    	sectionTitleActive=true;
         section( SECTION_LEVEL_2, null );
     }
 
     /** {@inheritDoc} */
     public void sectionTitle2()
     {
-//    	sectionTitleActive=true;
         sectionTitle( SECTION_LEVEL_2, null );
     }
 
     /** {@inheritDoc} */
     public void sectionTitle2_()
     {
-//    	sectionTitleActive = false;
         sectionTitle_( SECTION_LEVEL_2 );
     }
 
     /** {@inheritDoc} */
     public void section2_()
     {
-//    	sectionTitleActive=false;
         section_( SECTION_LEVEL_2 );
     }
 
@@ -556,7 +549,8 @@ public class FoSink
 
         title.append( getChapterString() );
         String ref =null;
-        
+        //if numbers are wanted at levels 5-6 (section LEVEL_4 regards to TOC-Level 5), 
+        //uncomment concerning lines. BUT: tests have to be modified otherwise they will cause the generation process to fail 
         writeEOL();
         if ( depth == SECTION_LEVEL_1 )
         {
@@ -633,7 +627,6 @@ public class FoSink
 //            title.append( sub4section ).append( "." );
 //            title.append( sub5section ).append( "   " );
         }
-//System.out.println("FoSink.onSectionTitle()- title= "+title);
         write( title.toString() );
     }
     
