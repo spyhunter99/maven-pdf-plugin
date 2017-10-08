@@ -639,6 +639,7 @@ public abstract class AbstractDocumentRenderer
             getLogger().info( "No outputName is defined in the document descriptor. Using 'target'" );
 
             documentModel.setOutputName( "target" );
+            outputName = documentModel.getOutputName();
         }
 
         outputName = outputName.trim();

@@ -186,7 +186,7 @@ public class FoPdfRenderer
             			}
             			
             			href = StringUtils.replace( item.getRef(), "\\", "/" );
-        	            if ( href.lastIndexOf( '.' ) != -1 )
+        	            if ( href!=null && href.lastIndexOf( '.' ) != -1 )
         	            {
         	                href = href.substring( 0, href.lastIndexOf( '.' ) );
         	            }
@@ -215,6 +215,7 @@ public class FoPdfRenderer
             			newList.remove(i);
             	}
             }
+            if (toc!=null)
             toc.setItems(newList);
             
             sink.coverPage();
