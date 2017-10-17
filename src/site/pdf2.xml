@@ -31,13 +31,15 @@ under the License.
   </meta>
 
   <toc name="Table of Contents" depth="2">
+    <item name="Executive Summary" ref="exsum.md"/>
     <item name="Introduction" ref="index.apt"/>
     <item name="Usage" ref="usage.apt.vm"/>
     <item name="Markdown Source" ref="helloWorld.md"/>
     <item name="Filtering Document Descriptor" ref="examples/filtering.apt"/>
     <item name="Configuring Reports" ref="/examples/configuring-reports.xml.vm"/>
     <item name="Limitations" ref="limitations.apt"/>
-	 <item name="Testfile for referencing" ref="testFileForReferencing.md"/>
+    <item name="Property Injection" ref="injection.md.vm"/>
+    <item name="Testfile for referencing" ref="testFileForReferencing.md"/>
     <item name="Testfile for referencing2" ref="testFileForReferencing2.md"/>
     <item name="Testfile for referencing3" ref="testFileForReferencing3.md"/>
     <item name="Testfile for referencing4" ref="testFileForReferencing4.md"/>

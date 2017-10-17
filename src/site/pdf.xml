@@ -38,6 +38,7 @@ under the License.
     <item name="Filtering Document Descriptor" ref="examples/filtering.apt"/>
     <item name="Configuring Reports" ref="examples/configuring-reports.xml.vm"/>
     <item name="Limitations" ref="limitations.apt"/>
+    <item name="Property Injection" ref="injection.md.vm"/>
     <item name="FAQ" ref="faq.fml"/>
   </toc>
 

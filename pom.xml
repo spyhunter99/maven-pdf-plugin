@@ -107,6 +107,8 @@ under the License.
         <maven.compiler.target>1.6</maven.compiler.target>
         
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <testProject.property>This property is used to test PDF .vm project injection. If you can read this in the PDF output, it's working.</testProject.property>
+        <testProjectProperty>This property is used to test PDF .vm project injection. If you can read this in the PDF output, it's working.</testProjectProperty>
     </properties>
 
     <dependencyManagement>
@@ -456,6 +458,11 @@ under the License.
                     <groupId>${project.groupId}</groupId>
                     <artifactId>maven-pdf-plugin</artifactId>
                     <version>${project.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.6</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.rat</groupId>

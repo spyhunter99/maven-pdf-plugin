@@ -1,0 +1,40 @@
+## Some Maven Property Injection tests
+
+### User defined properties in the parent pom
+
+**Note: properties with a period do not work**
+
+testProject.property = ${testProject.property}
+
+**Properties without a period do work**
+
+testProjectProperty = ${testProjectProperty}
+
+### Maven level properties
+
+
+project.version = ${project.version}
+
+project.build.sourceDirectory = ${project.build.sourceDirectory}
+
+project.build.scriptSourceDirectory = ${project.build.scriptSourceDirectory}
+
+project.build.testSourceDirectory = ${project.build.testSourceDirectory}
+
+project.build.outputDirectory = ${project.build.outputDirectory}
+
+project.build.testOutputDirectory = ${project.build.testOutputDirectory}
+
+project.build.directory = ${project.build.directory}
+
+project.baseUri = ${project.baseUri}
+
+### Environmental properties
+
+env.PATH = ${env.PATH}
+
+env.HOME = ${env.HOME}
+
+env.JAVA_HOME = ${env.JAVA_HOME}
+
+env.M2_HOME = ${env.M2_HOME}
