@@ -354,12 +354,12 @@ public class PdfMojo
     private String executiveSummaryName;
 
     /**
-     * Represents the documents classification (e.g. UNCLASSIFIED).
+     * Represents the documents title page header
      * 
      * @since 1.5.0.3-SNAPSHOT
      */
-    @Parameter( property = "classification", defaultValue = "", readonly = false )
-    private String classification;
+    @Parameter( property = "titleHeader", defaultValue = "", readonly = false )
+    private String titleHeader;
 
     /**
      * Represents the distribution statement of the final document.
@@ -590,7 +590,7 @@ public class PdfMojo
             context.put( "validate", validate );
             
             context.put( "executiveSummaryName", executiveSummaryName );
-            context.put( "classification", classification );
+            context.put( "titleHeader", titleHeader );
             context.put( "distributionStatement", distributionStatement );
             context.put( "pdfHeader", pdfHeader );
             context.put( "pdfFooter", pdfFooter );

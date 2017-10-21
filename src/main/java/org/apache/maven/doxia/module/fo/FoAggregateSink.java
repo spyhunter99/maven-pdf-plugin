@@ -1715,7 +1715,7 @@ public class FoAggregateSink
         }
 
         String pageSize = "USLetter";
-        String classification = "";
+        String titleHeader = "";
         if( meta!=null )
         {
         	pageSize = meta.getPageSize();
@@ -1725,9 +1725,9 @@ public class FoAggregateSink
     	DocumentRendererContext drContext = getRendererContext();
     	if( drContext!=null)
     	{
-    		Object tmp = drContext.get("classification");
+    		Object tmp = drContext.get("titleHeader");
     		if( tmp!=null )
-    			classification = tmp.toString();
+    			titleHeader = tmp.toString();
         }
     	
         MutableAttributeSet attBase = getFoConfiguration().getAttributeSet( "layout.master.set.base" );
@@ -1785,8 +1785,8 @@ public class FoAggregateSink
             	
             	
         writeln( "<fo:page-sequence master-reference=\"cover-page\">");
-        writeCoverHead(cover, availableWidthInInch, classification);
-        writeCoverFooter(classification);
+        writeCoverHead(cover, availableWidthInInch, titleHeader);
+        writeCoverFooter(titleHeader);
         writeCoverBody(cover, availableWidthInInch, availableHeightInInch, meta);
         
         writeEndTag( PAGE_SEQUENCE_TAG );
@@ -1797,9 +1797,9 @@ public class FoAggregateSink
      * Writes the header to the cover-page. DocumentCover has to be defined for this work.
      * @param cover the DocumentCover
      * @param availableWidth the available width (overall width - margins (left and right))
-     * @param classification the classificationstring that shall be written to the header (e.g. "UNCLASSIFIED")
+     * @param titleHeader the titleHeader string that shall be written to the header 
      */
-    private void writeCoverHead( DocumentCover cover, double availableWidth, String classification)
+    private void writeCoverHead( DocumentCover cover, double availableWidth, String titleHeader)
     {
     	if ( cover == null )
         {
@@ -1824,8 +1824,8 @@ public class FoAggregateSink
         
         //classification
         writeStartTag( TABLE_CELL_TAG, "number-columns-spanned", "5");
-        writeStartTag( BLOCK_TAG, "cover.classification");
-        writeln( classification );
+        writeStartTag( BLOCK_TAG, "cover.header");
+        writeln( titleHeader );
         writeEndTag( BLOCK_TAG );
         writeEndTag( TABLE_CELL_TAG );
         writeEndTag( TABLE_ROW_TAG );
@@ -2339,16 +2339,16 @@ public class FoAggregateSink
     
     /**
      * Writes the footer to the cover-page.
-     * @param classification the classification that is to be written to the cover-pages footer
+     * @param titleHeader the header that is to be written to the cover-pages footer
      */
-    private void writeCoverFooter( String classification )
+    private void writeCoverFooter( String titleHeader )
     {
     	writeStartTag( STATIC_CONTENT_TAG, "flow-name", "xsl-region-after" );
-        writeStartTag( BLOCK_TAG, "cover.classification");
+        writeStartTag( BLOCK_TAG, "cover.header");
        
-        if ( classification != null )
+        if ( titleHeader != null )
         {
-            write( classification );
+            write( titleHeader );
         }
         writeEndTag( BLOCK_TAG );
         writeEndTag( STATIC_CONTENT_TAG );
