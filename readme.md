@@ -11,6 +11,8 @@ Primary deltas
  - Title page has several new fields that can be populated
 	- Date
 	- Distribution statement
+ - Overridable stylesheet so you can customize the output on a per project/per pdf basis
+ - Table rendering supports alternate background colors per row
  
 This repo contains the source for several doxia modules and for the original maven-pdf-plugin
 
