@@ -572,14 +572,14 @@
         <xsl:attribute name="font-size">9.5pt</xsl:attribute>
         <xsl:attribute name="space-before">4pt</xsl:attribute>
     </xsl:attribute-set>
-<!--     <xsl:attribute-set name="toc.h5.style" use-attribute-sets="toc.base.style"> -->
-<!--         <xsl:attribute name="font-size">9pt</xsl:attribute> -->
-<!--         <xsl:attribute name="space-before">2pt</xsl:attribute> -->
-<!--     </xsl:attribute-set> -->
-<!--     <xsl:attribute-set name="toc.h6.style" use-attribute-sets="toc.base.style"> -->
-<!--         <xsl:attribute name="font-size">8.5pt</xsl:attribute> -->
-<!--         <xsl:attribute name="space-before">2pt</xsl:attribute> -->
-<!--     </xsl:attribute-set> -->
+     <xsl:attribute-set name="toc.h5.style" use-attribute-sets="toc.base.style"> 
+         <xsl:attribute name="font-size">9pt</xsl:attribute> 
+         <xsl:attribute name="space-before">2pt</xsl:attribute> 
+     </xsl:attribute-set> -->
+     <xsl:attribute-set name="toc.h6.style" use-attribute-sets="toc.base.style"> 
+         <xsl:attribute name="font-size">8.5pt</xsl:attribute> 
+         <xsl:attribute name="space-before">2pt</xsl:attribute> 
+     </xsl:attribute-set> 
     <xsl:attribute-set name="toc.hanging.indentation" use-attribute-sets="toc.base.style">
         <xsl:attribute name="indentation">0.0in</xsl:attribute>
     </xsl:attribute-set>
