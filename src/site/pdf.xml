@@ -36,9 +36,9 @@ under the License.
     <item name="Introduction" ref="index.apt.vm"/>
     <item name="Usage" ref="usage.apt.vm"/>
     <item name="Filtering Document Descriptor" ref="examples/filtering.apt"/>
-    <item name="Configuring Reports" ref="examples/configuring-reports.xml.vm"/>
     <item name="Limitations" ref="limitations.apt"/>
-    <item name="Property Injection" ref="injection.md.vm"/>
+    <item name="Property Injection" ref="injection.md"/>
+	<item name="Property Injection2" ref="injection2.md.vm"/>
     <item name="FAQ" ref="faq.fml"/>
   </toc>
 
