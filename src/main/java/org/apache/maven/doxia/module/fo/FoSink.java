@@ -181,6 +181,7 @@ public class FoSink
         this.out = new PrintWriter( writer );
         this.encoding = encoding;
         this.languageId = languageId;
+        
         this.config = new FoConfiguration();
 
         this.listStack = new Stack<NumberedListItem>();

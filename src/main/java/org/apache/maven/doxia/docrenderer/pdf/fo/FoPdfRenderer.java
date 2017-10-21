@@ -119,7 +119,11 @@ public class FoPdfRenderer
 
             FoAggregateSink sink = new FoAggregateSink( writer, context );
 
-            File fOConfigFile = new File( outputDirectory, "pdf-config.xml" );
+            File fOConfigFile = null;
+            if ( context!=null && context.containsKey( "foStylesOverride") )
+                fOConfigFile = (File) context.get("foStylesOverride");
+            else 
+                fOConfigFile = new File( outputDirectory, "pdf-config.xml" );
 
             if ( fOConfigFile.exists() )
             {

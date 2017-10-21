@@ -394,6 +394,12 @@ public class PdfMojo
      */
     @Parameter( property = "pdfCoverDate")
     private String pdfCoverDate;
+    
+    /**
+     * Defines a custom fo-styles.xslt file which enables customization of the output
+     */
+    @Parameter( property = "foStylesOverride")
+    private File foStylesOverride;
 
     // ----------------------------------------------------------------------
     // Instance fields
@@ -595,6 +601,9 @@ public class PdfMojo
             context.put( "pdfHeader", pdfHeader );
             context.put( "pdfFooter", pdfFooter );
             context.put( "coverDate" , pdfCoverDate);
+            if (foStylesOverride!=null && foStylesOverride.exists()) 
+                context.put( "foStylesOverride", foStylesOverride );
+            
             if( tocMaxDepthToPrint!=null && !tocMaxDepthToPrint.trim().isEmpty() )
             	context.put( "tocMaxDepthToPrint", tocMaxDepthToPrint);
             
