@@ -524,6 +524,11 @@
         <xsl:attribute name="padding-after">1.5pt</xsl:attribute>
         <xsl:attribute name="background-color">#eeeeee</xsl:attribute>
     </xsl:attribute-set>
+    <xsl:attribute-set name="table.body.cell.alternate" use-attribute-sets="base.cell">
+        <xsl:attribute name="padding-before">4pt</xsl:attribute>
+        <xsl:attribute name="padding-after">1.5pt</xsl:attribute>
+        <xsl:attribute name="background-color">#f9f9f9</xsl:attribute>
+    </xsl:attribute-set>
     <xsl:attribute-set name="table.body.block" use-attribute-sets="base.block">
         <xsl:attribute name="font-size">9pt</xsl:attribute>
     </xsl:attribute-set>

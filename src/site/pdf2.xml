@@ -39,6 +39,7 @@ under the License.
     <item name="Configuring Reports" ref="/examples/configuring-reports.xml.vm"/>
     <item name="Limitations" ref="limitations.apt"/>
     <item name="Property Injection" ref="injection.md.vm"/>
+    <item name="Test for Tables" ref="tableTest.md"/>
     <item name="Testfile for referencing" ref="testFileForReferencing.md"/>
     <item name="Testfile for referencing2" ref="testFileForReferencing2.md"/>
     <item name="Testfile for referencing3" ref="testFileForReferencing3.md"/>

@@ -68,6 +68,9 @@ public class FoSink
     /** For writing the result. */
     private final PrintWriter out;
 
+    /** row count, used for using an alternate background on rows, similar to bootstrap table.stripped */
+    private long rowCount = -1;
+    
     /** Used to get the current position in numbered lists. */
     private final Stack<NumberedListItem> listStack;
 
@@ -1137,6 +1140,7 @@ public class FoSink
     /** {@inheritDoc} */
     public void table( SinkEventAttributes attributes )
     {
+        this.rowCount=-1;
         writeEOL();
         writeStartTag( BLOCK_TAG, "table.padding" );
 
@@ -1212,6 +1216,7 @@ public class FoSink
     /** {@inheritDoc} */
     public void tableRow( SinkEventAttributes attributes )
     {
+        rowCount++;
         // TODO spacer rows
         writeStartTag( TABLE_ROW_TAG, "table.body.row" );
         this.cellCountStack.removeLast();
@@ -1234,7 +1239,7 @@ public class FoSink
     /** {@inheritDoc} */
     public void tableCell( SinkEventAttributes attributes )
     {
-        tableCell( false, attributes );
+        tableCell( false, attributes, rowCount );
     }
 
     /** {@inheritDoc} */
@@ -1253,7 +1258,7 @@ public class FoSink
     /** {@inheritDoc} */
     public void tableHeaderCell( SinkEventAttributes attributes )
     {
-        tableCell( true, attributes );
+        tableCell( true, attributes, rowCount );
     }
 
     /** {@inheritDoc} */
@@ -1275,12 +1280,24 @@ public class FoSink
      * @param headerRow true if this is a header cell.
      * @param attributes the cell attributes, could be null.
      */
-    private void tableCell( boolean headerRow, SinkEventAttributes attributes )
+    private void tableCell( boolean headerRow, SinkEventAttributes attributes, long rowCount )
     {
-        MutableAttributeSet cellAtts = headerRow
-                 ? config.getAttributeSet( "table.heading.cell" )
-                 : config.getAttributeSet( "table.body.cell" );
-
+        MutableAttributeSet cellAtts;
+        if ( headerRow ) 
+        {
+            cellAtts = config.getAttributeSet( "table.heading.cell" );
+        }
+        else if (rowCount%2==0) 
+        {
+            cellAtts = config.getAttributeSet( "table.body.cell" );
+        }
+        else 
+        {
+            cellAtts = config.getAttributeSet( "table.body.cell.alternate" );
+        }
+        
+        
+        
         // the column-number is needed for the hack to center the table, see tableRows.
         int cellCount = Integer.parseInt( this.cellCountStack.getLast().toString() );
         cellAtts.addAttribute( "column-number", String.valueOf( cellCount + 1 ) );
