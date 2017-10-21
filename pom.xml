@@ -534,6 +534,7 @@ under the License.
                             <pdfCoverDate>1970-1-1</pdfCoverDate>
                                                         
                             <tocMaxDepthToPrint>6</tocMaxDepthToPrint>
+                            <!-- optional, you can override any of the colors, fonts, padding etc with your own file here -->
                             <foStylesOverride>src/main/resources/fo-styles_1.xslt</foStylesOverride>
                         </configuration>
                     </execution>

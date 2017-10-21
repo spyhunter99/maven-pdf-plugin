@@ -67,6 +67,8 @@ ASF 2.0 licensed
 					
 					<!-- optional, the max depth of the TOC -->
 					<tocMaxDepthToPrint>4</tocMaxDepthToPrint>
+                                        <!-- optional, you can override any of the colors, fonts, padding etc with your own file here -->
+                                        <foStylesOverride>src/main/resources/fo-styles_1.xslt</foStylesOverride>
 				  </configuration>
 				</execution>
 			  
