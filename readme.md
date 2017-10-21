@@ -28,7 +28,7 @@ ASF 2.0 licensed
 		<plugin>
 			<groupId>com.github.spyhunter99</groupId>
 			<artifactId>maven-pdf-plugin</artifactId>
-			<version>1.5.0.5</version>
+			<version>1.5.0.6</version>
 			<executions>
 				<execution>
 				  <id>pdf-user</id>
