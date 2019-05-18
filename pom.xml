@@ -98,7 +98,7 @@ under the License.
     </distributionManagement>
 
     <properties>
-        <doxiaVersion>1.7</doxiaVersion>
+        <doxiaVersion>1.8</doxiaVersion>
         <doxiaSitetoolsVersion>1.7.4</doxiaSitetoolsVersion>
         <mavenVersion>2.2.1</mavenVersion>
         <timestamp>${maven.build.timestamp}</timestamp>
@@ -396,7 +396,7 @@ under the License.
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-component-annotations</artifactId>
-            <version>${doxiaVersion}</version>
+            <version>2.0.0</version>
         </dependency>
     
         <dependency>
@@ -437,6 +437,20 @@ under the License.
             <artifactId>xml-apis</artifactId>
             <version>1.3.04</version>
         </dependency>
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
+            <version>1.6</version>
+            <scope>test</scope>
+        </dependency>
+               
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-matchers</artifactId>
+            <version>2.2.1</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -462,7 +476,7 @@ under the License.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.6</version>
+                    <version>3.7.1</version>
                     
                     <dependencies>
                         <dependency>
