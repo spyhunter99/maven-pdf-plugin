@@ -98,13 +98,13 @@ under the License.
     </distributionManagement>
 
     <properties>
-        <doxiaVersion>1.8</doxiaVersion>
-        <doxiaSitetoolsVersion>1.7.4</doxiaSitetoolsVersion>
+        <doxiaVersion>1.9.1</doxiaVersion>
+        <doxiaSitetoolsVersion>1.9.2</doxiaSitetoolsVersion>
         <mavenVersion>2.2.1</mavenVersion>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <testProject.property>This property is used to test PDF .vm project injection. If you can read this in the PDF output, it's working.</testProject.property>
@@ -194,7 +194,7 @@ under the License.
         <dependency>
             <groupId>org.apache.maven.doxia</groupId>
             <artifactId>doxia-core</artifactId>
-            <version>1.7</version>
+            <version>1.9.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.codehaus.plexus</groupId>
@@ -208,7 +208,7 @@ under the License.
         <dependency>
             <groupId>org.apache.maven.doxia</groupId>
             <artifactId>doxia-integration-tools</artifactId>
-            <version>1.7.4</version>
+            <version>1.9.2</version>
         </dependency>
   
         <dependency>
@@ -270,7 +270,7 @@ under the License.
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>4.13</version>
             <scope>test</scope>
         </dependency>
         <dependency>
