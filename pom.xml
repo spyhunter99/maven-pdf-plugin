@@ -98,7 +98,7 @@ under the License.
     </distributionManagement>
 
     <properties>
-        <doxiaVersion>1.9.1</doxiaVersion>
+        <doxiaVersion>1.10</doxiaVersion>
         <doxiaSitetoolsVersion>1.9.2</doxiaSitetoolsVersion>
         <mavenVersion>2.2.1</mavenVersion>
         <timestamp>${maven.build.timestamp}</timestamp>
