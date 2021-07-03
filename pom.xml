@@ -99,7 +99,7 @@ under the License.
 
     <properties>
         <doxiaVersion>1.10</doxiaVersion>
-        <doxiaSitetoolsVersion>1.9.2</doxiaSitetoolsVersion>
+        <doxiaSitetoolsVersion>1.10</doxiaSitetoolsVersion>
         <mavenVersion>2.2.1</mavenVersion>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
@@ -194,7 +194,7 @@ under the License.
         <dependency>
             <groupId>org.apache.maven.doxia</groupId>
             <artifactId>doxia-core</artifactId>
-            <version>1.9.1</version>
+            <version>${doxiaSitetoolsVersion}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.codehaus.plexus</groupId>
@@ -208,7 +208,7 @@ under the License.
         <dependency>
             <groupId>org.apache.maven.doxia</groupId>
             <artifactId>doxia-integration-tools</artifactId>
-            <version>1.9.2</version>
+            <version>${doxiaSitetoolsVersion}</version>
         </dependency>
   
         <dependency>
