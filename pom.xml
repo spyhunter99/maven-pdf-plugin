@@ -98,7 +98,7 @@ under the License.
     </distributionManagement>
 
     <properties>
-        <doxiaVersion>1.10</doxiaVersion>
+        <doxiaVersion>1.11.1</doxiaVersion>
         <doxiaSitetoolsVersion>1.11.1</doxiaSitetoolsVersion>
         <mavenVersion>2.2.1</mavenVersion>
         <timestamp>${maven.build.timestamp}</timestamp>
@@ -194,7 +194,7 @@ under the License.
         <dependency>
             <groupId>org.apache.maven.doxia</groupId>
             <artifactId>doxia-core</artifactId>
-            <version>1.9.1</version>
+            <version>1.11.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.codehaus.plexus</groupId>
