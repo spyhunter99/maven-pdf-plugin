@@ -169,7 +169,7 @@ under the License.
         <dependency>
             <groupId>org.apache.maven.reporting</groupId>
             <artifactId>maven-reporting-impl</artifactId>
-            <version>2.3</version>
+            <version>3.1.0</version>
         </dependency>
 
         <!-- Doxia -->
