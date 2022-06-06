@@ -208,7 +208,7 @@ under the License.
         <dependency>
             <groupId>org.apache.maven.doxia</groupId>
             <artifactId>doxia-integration-tools</artifactId>
-            <version>1.9.2</version>
+            <version>1.11.1</version>
         </dependency>
   
         <dependency>
@@ -243,12 +243,12 @@ under the License.
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.7</version>
+            <version>2.11.0</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-interpolation</artifactId>
-            <version>1.24</version>
+            <version>1.26</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
@@ -316,7 +316,7 @@ under the License.
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>fop</artifactId>
-            <version>0.95</version>
+            <version>2.7</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
