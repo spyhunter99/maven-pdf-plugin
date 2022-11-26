@@ -513,7 +513,7 @@ under the License.
                 <executions>
                     <execution>
                         <id>pdf</id>
-                        <phase>site</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>pdf</goal>
                         </goals>
@@ -524,7 +524,7 @@ under the License.
                     </execution>
                     <execution>
                         <id>pdf2</id>
-                        <phase>site</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>pdf</goal>
                         </goals>
@@ -561,6 +561,64 @@ under the License.
 
             </plugin>
             <!-- END SNIPPET: configuration -->
+            
+             <plugin>
+                <groupId>com.github.spyhunter99</groupId>
+                <artifactId>maven-pdf-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <id>pdf3</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>pdf</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.reporting.outputDirectory}</outputDirectory>
+                            <includeReports>true</includeReports>
+                                <docDescriptor>src/site/pdf3.xml</docDescriptor>
+
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>pdf4</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>pdf</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.reporting.outputDirectory}</outputDirectory>
+                            <includeReports>true</includeReports>
+                            <docDescriptor>src/site/pdf4.xml</docDescriptor>
+                            <executiveSummaryName>EXSUM</executiveSummaryName>
+                            <titleHeader>A custom header only on the title pages</titleHeader>
+                            <!-- the distribution statement is printed on the title page towards the bottom, common use case:
+                            confidentiality statements, limited distribution, legalese and other mumbo jumbo.-->
+                            <distributionStatement>DISTRIBUTION STATEMENT: Feel free to give this document to anyone who will take it.</distributionStatement>
+							
+                            <!-- these header/footer definitions are used on all pages exception the title page -->
+                            <pdfFooter>Some contet 
+                                Second line content 
+                                Third line content 
+                                Version ${project.version} 
+                                ${timestamp}</pdfFooter>
+                            <pdfHeader>Some contet 
+                                Second line content 
+                                Third line content 
+                                Version ${project.version} 
+                                ${timestamp}</pdfHeader>
+                            <!-- the cover page can have a pom defined date too, use "auto" to auto populate -->
+                            <pdfCoverDate>1970-1-1</pdfCoverDate>
+                                                        
+                            <tocMaxDepthToPrint>6</tocMaxDepthToPrint>
+                            <!-- optional, you can override any of the colors, fonts, padding etc with your own file here -->
+                            <foStylesOverride>src/main/resources/fo-styles_1.xslt</foStylesOverride>
+                        </configuration>
+                    </execution>
+                </executions>
+
+            </plugin>
+            
         </plugins>
     </build>
 

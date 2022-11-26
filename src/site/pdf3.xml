@@ -22,31 +22,23 @@ under the License.
 <!-- START SNIPPET: docDescriptor -->
 <document xmlns="http://maven.apache.org/DOCUMENT/1.0.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/DOCUMENT/1.0.1 http://maven.apache.org/xsd/document-1.0.1.xsd"
-  outputName="maven-pdf-plugin2">
+  xsi:schemaLocation="http://maven.apache.org/DOCUMENT/1.0.1 
+      http://maven.apache.org/xsd/document-1.0.1.xsd"
+  outputName="maven-pdf-plugin3">
 
   <meta>
     <title>Maven PDF Plugin</title>
     <author>The Apache Maven Project</author>
   </meta>
-
-  <toc name="Table of Contents" depth="2">
-    <item name="Executive Summary" ref="exsum.md"/>
-    <item name="Introduction" ref="index.apt"/>
+  <!-- depth of the TOC can be controlled by adding a depth attribute-->
+  <toc name="Table of Contents">
+  	<item name="Executive Summary" ref="exsum.md"/>
+    <item name="Introduction" ref="index.apt.vm"/>
     <item name="Usage" ref="usage.apt.vm"/>
-    <item name="Markdown Source" ref="helloWorld.md"/>
     <item name="Filtering Document Descriptor" ref="examples/filtering.apt"/>
-    <item name="Configuring Reports" ref="/examples/configuring-reports.xml.vm"/>
     <item name="Limitations" ref="limitations.apt"/>
-    <item name="Property Injection" ref="injection.md.vm"/>
-    <item name="Test for Tables" ref="tableTest.md"/>
-    <item name="Testfile for referencing" ref="testFileForReferencing.md"/>
-    <item name="Testfile for referencing2" ref="testFileForReferencing2.md"/>
-    <item name="Testfile for referencing3" ref="testFileForReferencing3.md"/>
-    <item name="Testfile for referencing4" ref="testFileForReferencing4.md"/>
-    <item name="Testfile for referencing5" ref="testFileForReferencing5.md"/>
-    <item name="Testfile for referencing6" ref="testFileForReferencing6.md"/>
-    <item name="Testfile for referencing7" ref="testFileForReferencing7.md"/>
+    <item name="Property Injection" ref="injection.md"/>
+	<item name="Property Injection2" ref="injection2.md.vm"/>
     <item name="FAQ" ref="faq.fml"/>
   </toc>
 
@@ -55,10 +47,10 @@ under the License.
     <coverSubTitle>v. ${project.version}</coverSubTitle>
     <coverType>User Guide</coverType>
     <projectName>${project.name}</projectName>
-    <projectLogo>https://maven.apache.org/images/maventxt_logo_200.gif</projectLogo>
+    <projectLogo>images\test_2175x775.jpg</projectLogo>
     <companyName>The Apache Software Foundation</companyName>
-    <companyLogo>https://www.apache.org/images/asf_logo_wide.png</companyLogo>
-<!--     <author>First Last, mail@adress, 443-000-0000</author> -->
+    <companyLogo>http://www.apache.org/images/asf_logo_wide.png</companyLogo>
+    <author>First Last, mail@adress, 443-000-0000</author>
   </cover>
 </document>
 <!-- END SNIPPET: docDescriptor -->
