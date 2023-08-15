@@ -100,7 +100,7 @@ under the License.
     <properties>
         <doxiaVersion>1.11.1</doxiaVersion>
         <doxiaSitetoolsVersion>1.11.1</doxiaSitetoolsVersion>
-        <mavenVersion>2.2.1</mavenVersion>
+        <mavenVersion>3.8.1</mavenVersion>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
         <maven.compiler.source>1.8</maven.compiler.source>
